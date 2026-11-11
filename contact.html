@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+     <meta charset="UTF-8">
+    <title>Almattar-Tech </title>
+    <link rel="stylesheet" href="design.css.css">
+    <script type="module" src="javascript.js" defer></script>
+    </head>
+    <body>
+         <nav>
+         <div>
+               <img src="logo.png" alt="Logo">
+      </div>
+        <ul class="nnn">
+            <li class="nav-text"><i>ALMATTAR-TECH</i></li>
+            <li class="space"><button onclick="window.location.href='index.html'">HOME</button></li>
+            <li><button onclick="window.location.href='news.html'">NEWS</button></li>
+            <li><button onclick="window.location.href='videos.html'">videos</button></li>
+            <li><button class="buttons"onclick="window.location.href='contact.html'">CONTACT</button></li>
+            <li><button onclick="window.location.href='info.html'">INFO</button></li>
+        </ul>
+        <input class="search" type="search" placeholder="Search...">
+    </nav>
+    <form method="post" action="contact.php" class="form">
+        <fieldset>
+            <legend><i><b>Message</b></i></legend>
+            <p> 
+                <label class="field" for="name"><b>Name:</b></label>
+                <input id="name" name="name" type="text" required
+                    pattern="[A-Za-z\u00C0-\u024F\u1E00-\u1EFF\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF ]+"
+                    title="Enter your name using letters only."
+                    oninput="this.value = this.value.replace(/[^A-Za-z\u00C0-\u024F\u1E00-\u1EFF\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF ]/g, '')" class="cas">
+            </p>
+            <p> 
+                <label class="field" for="email"><b>Email:</b></label>
+                <input id="email" name="email" type="email" required class="cas">
+            </p>
+            <p> 
+                <label class="field" for="message"><b>Message:</b></label>
+                <textarea id="message" name="message" required class="textarea"></textarea>
+            </p>
+            <div class="g-recaptcha" data-sitekey="YOUR_SITE_KEY">
+            <p> 
+                <input class="c-button" type="reset" value="Reset">
+                <input class="c-button" type="submit" value="Send">
+            </p>
+            </div>
+        </fieldset>
+    </form>
+    </body>
+</html>
