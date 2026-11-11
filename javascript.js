@@ -3,7 +3,6 @@ import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.2.0/firebase
 import {
   getAuth,
   GoogleAuthProvider,
-  getIdTokenResult,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -42,6 +41,7 @@ const auth = getAuth(app);
 const database = getDatabase(app);
 const storage = getStorage(app);
 const adminEmail = "almattartech@gmail.com";
+
 const contentPage = document.querySelector("[data-content-page]");
 const addContentButton = document.querySelector(".content-add");
 const contentForm = document.querySelector(".content-form");
@@ -50,6 +50,7 @@ const contentStatus = document.querySelector(".content-status");
 const loginModal = document.getElementById("loginModal");
 const loginForm = document.getElementById("adminLoginForm");
 const loginMessage = document.getElementById("loginMessage");
+const loginButton = document.getElementById("adminLoginButton");
 
 function showLoginMessage(message) {
   if (loginMessage) {
@@ -230,20 +231,16 @@ async function addPageContent(event) {
   }
 }
 
+// مراقبة حالة تسجيل الدخول: إخفاء/إظهار زر الـ LOGIN وزر إضافة المحتوى للأدمن فقط
 onAuthStateChanged(auth, async (user) => {
+  const isAdmin = await checkAdminAccess(user);
+  
+  if (loginButton) {
+    loginButton.style.display = user ? "none" : "block"; // يختفي زر الـ LOGIN عند تسجيل الدخول
+  }
+
   if (addContentButton) {
-    addContentButton.hidden = true;
-  }
-
-  if (!user || !addContentButton) {
-    return;
-  }
-
-  try {
-    addContentButton.hidden = !(await checkAdminAccess(user));
-  } catch (error) {
-    console.error("Could not verify admin permissions:", error);
-    showContentStatus("Could not verify admin permissions. Please sign in again.");
+    addContentButton.hidden = !isAdmin; // زر إضافة المحتوى يظهر حصراً للأدمن
   }
 });
 
