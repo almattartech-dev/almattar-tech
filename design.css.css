@@ -426,6 +426,17 @@ nav img{
     font-size: 1rem;
 }
 
+.contact-status {
+    min-height: 1.25em;
+    margin: 12px 0;
+    color: var(--color-accent);
+    font-size: 1rem;
+}
+
+.contact-status.is-error {
+    color: #ff8a80;
+}
+
 .content-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
@@ -461,7 +472,7 @@ nav img{
 
 @media (max-width: 900px) {
     body {
-        padding: 110px 24px 40px;
+        padding: 150px 24px 40px;
     }
 
     nav {
@@ -491,5 +502,125 @@ nav img{
         margin: 0;
     }
 
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 205px 16px 32px;
+    }
+
+    nav {
+        position: absolute;
+        display: grid;
+        grid-template-columns: 48px minmax(0, 1fr) auto;
+        grid-template-areas:
+            "logo login search"
+            "menu menu menu";
+        gap: 10px 8px;
+        padding: 10px 12px;
+        background: rgba(8, 8, 8, 0.88);
+        border-bottom: 1px solid var(--color-accent-border);
+    }
+
+    nav > div {
+        grid-area: logo;
+    }
+
+    nav img {
+        display: block;
+        width: 46px;
+        height: 46px;
+        margin: 0;
+    }
+
+    nav ul {
+        grid-area: menu;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 7px;
+        min-width: 0;
+    }
+
+    nav ul .nav-text {
+        flex: 1 0 100%;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+        font-size: 1rem;
+    }
+
+    nav ul button {
+        padding: 7px 10px;
+        font-size: 0.78rem;
+    }
+
+    .space {
+        margin: 0;
+    }
+
+    nav #adminLoginButton {
+        grid-area: login;
+        justify-self: end;
+        margin: 0;
+        padding: 7px 10px;
+    }
+
+    nav .search {
+        grid-area: search;
+        box-sizing: border-box;
+        width: 112px;
+        min-width: 0;
+        margin: 0;
+        padding: 8px 10px;
+    }
+
+    h1 {
+        margin-left: 0;
+        font-size: clamp(1.8rem, 8vw, 2.5rem);
+    }
+
+    p.pre {
+        margin: 8px 0 0;
+        font-size: clamp(1.6rem, 7vw, 2.2rem);
+    }
+
+    .content-page {
+        margin-top: 20px;
+    }
+
+    .content-form {
+        max-width: none;
+        padding: 16px;
+    }
+
+    .form {
+        margin-right: 0;
+    }
+
+    .form fieldset {
+        min-width: 0;
+        padding: 12px;
+    }
+
+    .cas {
+        width: 100%;
+        margin-right: 0;
+    }
+
+    .textarea {
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 120px;
+        padding: 12px;
+    }
+
+    .c-button {
+        margin-right: 8px;
+    }
+
+    .login-panel {
+        padding: 28px 20px;
+    }
 }
     

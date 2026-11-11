@@ -2,9 +2,10 @@
 <html>
     <head>
      <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Almattar-Tech </title>
     <link rel="stylesheet" href="design.css.css">
-    <script type="module" src="javascript.js" defer></script>
+    <script type="module" src="contact.js" defer></script>
     </head>
     <body>
          <nav>
@@ -21,7 +22,7 @@
         </ul>
         <input class="search" type="search" placeholder="Search...">
     </nav>
-    <form method="post" action="contact.php" class="form">
+    <form id="contactForm" method="post" class="form">
         <fieldset>
             <legend><i><b>Message</b></i></legend>
             <p> 
@@ -47,5 +48,6 @@
             </div>
         </fieldset>
     </form>
+    <p id="contactStatus" class="contact-status" aria-live="polite"></p>
     </body>
 </html>
