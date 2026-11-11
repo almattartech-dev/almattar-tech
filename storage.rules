@@ -1,0 +1,32 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /site-content/{page}/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.token.email == 'almattartech@gmail.com'
+        && request.auth.token.email_verified == true
+        && request.resource != null
+        && (
+          (
+            (page == 'news' || page == 'info')
+            && (
+              (
+                request.resource.size <= 20971520
+                && request.resource.contentType.matches('image/(jpeg|png|webp|gif)')
+              )
+              || (
+                request.resource.size <= 104857600
+                && request.resource.contentType.matches('video/(mp4|webm)')
+              )
+            )
+          )
+          || (
+            page == 'videos'
+            && request.resource.size <= 104857600
+            && request.resource.contentType.matches('video/(mp4|webm)')
+          )
+        );
+    }
+  }
+}

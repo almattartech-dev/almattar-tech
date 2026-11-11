@@ -21,5 +21,24 @@
         </ul>
         <input class="search" type="search" placeholder="Search...">
     </nav>
+    <main class="content-page" data-content-page="videos">
+        <button class="content-add" type="button" hidden aria-label="Add video">+</button>
+        <form class="content-form" hidden>
+            <label>
+                Video
+                <input type="file" accept="video/mp4,video/webm" required>
+            </label>
+            <label>
+                Short description
+                <textarea maxlength="500" required></textarea>
+            </label>
+            <div class="content-form-actions">
+                <button type="submit">Add video</button>
+                <button class="content-form-cancel" type="button">Cancel</button>
+            </div>
+        </form>
+        <p class="content-status" aria-live="polite"></p>
+        <section class="content-list" aria-label="Videos"></section>
+    </main>
     </body>
 </html>

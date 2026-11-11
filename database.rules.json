@@ -1,0 +1,13 @@
+{
+  "rules": {
+    "content": {
+      ".read": true,
+      "$page": {
+        ".write": "auth != null && auth.token.email == 'almattartech@gmail.com' && auth.token.email_verified == true && ($page == 'news' || $page == 'info' || $page == 'videos')",
+        "$item": {
+          ".validate": "newData.hasChildren(['description', 'mediaUrl', 'mediaType', 'createdAt']) && newData.numChildren() == 4 && newData.child('description').isString() && newData.child('description').val().length > 0 && newData.child('description').val().length <= 500 && newData.child('mediaUrl').isString() && newData.child('mediaType').isString() && (newData.child('mediaType').val() == 'image' || newData.child('mediaType').val() == 'video') && newData.child('createdAt').isNumber()"
+        }
+      }
+    }
+  }
+}
