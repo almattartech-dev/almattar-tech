@@ -167,3 +167,220 @@ function getAllowedFile(file, page) {
     throw new Error(page === "videos"
       ? "Choose an MP4 or WebM video."
       : "Choose an image or an MP4/WebM video.");
+  }
+  if (file.size > maxSize) {
+    throw new Error(`The selected file is too large. Maximum size: ${isImage ? "20 MB" : "100 MB"}.`);
+  }
+}
+
+async function addPageContent(event) {
+  event.preventDefault();
+  if (!contentForm || !contentPage) {
+    return;
+  }
+
+  const user = auth.currentUser;
+  const page = contentPage.dataset.contentPage;
+  const fileInput = contentForm.querySelector('input[type="file"]');
+  const descriptionInput = contentForm.querySelector('textarea');
+  const submitButton = contentForm.querySelector('[type="submit"]');
+  const file = fileInput.files[0];
+  const description = descriptionInput.value.trim();
+
+  showContentStatus("");
+
+  if (!user) {
+    showContentStatus("Admin access is required to add content.");
+    return;
+  }
+  if (!file || !description) {
+    showContentStatus("Choose a file and enter its description.");
+    return;
+  }
+
+  let uploadedFileRef;
+  let uploadCompleted = false;
+  submitButton.disabled = true;
+  showContentStatus("Uploading content...");
+
+  try {
+    if (!(await checkAdminAccess(user))) {
+      showContentStatus("Admin access is required to add content.");
+      return;
+    }
+
+    getAllowedFile(file, page);
+    const itemRef = push(databaseRef(database, `content/${page}`));
+    const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    uploadedFileRef = storageRef(storage, `site-content/${page}/${itemRef.key}-${safeFileName}`);
+    await uploadBytes(uploadedFileRef, file, { contentType: file.type });
+    uploadCompleted = true;
+    const mediaUrl = await getDownloadURL(uploadedFileRef);
+
+    await set(itemRef, {
+      description,
+      mediaUrl,
+      mediaType: file.type.startsWith("image/") ? "image" : "video",
+      createdAt: Date.now()
+    });
+
+    contentForm.reset();
+    contentForm.hidden = true;
+    showContentStatus("Content added successfully.");
+  } catch (error) {
+    console.error("Could not add page content:", error);
+    if (uploadCompleted && uploadedFileRef) {
+      try {
+        await deleteObject(uploadedFileRef);
+      } catch (cleanupError) {
+        console.error("Could not remove the incomplete uploaded file:", cleanupError);
+      }
+    }
+    showContentStatus(error instanceof Error ? error.message : "Could not add content. Check Firebase setup and rules.");
+  } finally {
+    submitButton.disabled = false;
+  }
+}
+
+onAuthStateChanged(auth, async (user) => {
+  let isAdmin = false;
+
+  try {
+    isAdmin = await checkAdminAccess(user);
+  } catch (error) {
+    console.error("Could not verify admin permissions:", error);
+    showLoginMessage("Could not verify admin permissions. Please try again.");
+  }
+
+  if (loginButton) {
+    loginButton.hidden = isAdmin;
+  }
+
+  if (isAdmin && loginModal) {
+    loginModal.hidden = true;
+  }
+
+  if (addContentButton) {
+    addContentButton.hidden = !isAdmin;
+  }
+});
+
+document.getElementById("adminLoginButton")?.addEventListener("click", () => {
+  if (loginModal) {
+    loginModal.hidden = false;
+  }
+});
+
+document.getElementById("closeLoginModal")?.addEventListener("click", () => {
+  if (loginModal) {
+    loginModal.hidden = true;
+  }
+});
+
+loginForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  showLoginMessage("");
+
+  const email = document.getElementById("adminEmail").value.trim();
+  const password = document.getElementById("adminPassword").value;
+
+  try {
+    const { user } = await signInWithEmailAndPassword(auth, email, password);
+    if (!(await checkAdminAccess(user))) {
+      await signOut(auth);
+      showLoginMessage("This account does not have admin access.");
+      return;
+    }
+
+    if (loginModal) {
+      loginModal.hidden = true;
+    }
+    if (loginButton) {
+      loginButton.hidden = true;
+    }
+  } catch (error) {
+    console.error("Login error:", error.code, error.message);
+    showLoginMessage("Login failed. Check your email and password, then try again.");
+  }
+});
+
+document.getElementById("googleLoginBtn")?.addEventListener("click", async () => {
+  showLoginMessage("");
+
+  try {
+    const { user } = await signInWithPopup(auth, new GoogleAuthProvider());
+    if (!(await checkAdminAccess(user))) {
+      await signOut(auth);
+      showLoginMessage("This account does not have admin access.");
+      return;
+    }
+
+    if (loginModal) {
+      loginModal.hidden = true;
+    }
+    if (loginButton) {
+      loginButton.hidden = true;
+    }
+  } catch (error) {
+    console.error("Google login error:", error.code, error.message);
+    showLoginMessage(getGoogleLoginErrorMessage(error));
+  }
+});
+
+contactForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const formData = new FormData(contactForm);
+  const name = String(formData.get("name") || "").trim();
+  const email = String(formData.get("email") || "").trim();
+  const message = String(formData.get("message") || "").trim();
+
+  if (!name || !email || !message) {
+    showContactStatus("الرجاء تعبئة جميع الحقول المطلوبة.", true);
+    return;
+  }
+
+  const submitButton = contactForm.querySelector('button[type="submit"], input[type="submit"]');
+  if (submitButton) {
+    submitButton.disabled = true;
+  }
+  showContactStatus("جاري إرسال الرسالة...");
+
+  try {
+    await push(databaseRef(database, "messages"), {
+      name,
+      email,
+      message,
+      createdAt: Date.now()
+    });
+
+    contactForm.reset();
+    showContactStatus("تم إرسال رسالتك بنجاح! شكراً لك.");
+  } catch (error) {
+    console.error("خطأ في إرسال الرسالة:", error);
+    showContactStatus("حدث خطأ أثناء الإرسال، حاول مجدداً.", true);
+  } finally {
+    if (submitButton) {
+      submitButton.disabled = false;
+    }
+  }
+});
+
+addContentButton?.addEventListener("click", () => {
+  if (contentForm) {
+    contentForm.hidden = !contentForm.hidden;
+  }
+});
+
+document.querySelector(".content-form-cancel")?.addEventListener("click", () => {
+  if (contentForm) {
+    contentForm.reset();
+    contentForm.hidden = true;
+  }
+});
+
+contentForm?.addEventListener("submit", addPageContent);
+
+if (contentPage) {
+  loadPageContent(contentPage.dataset.contentPage);
+}
