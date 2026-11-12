@@ -1,5 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-analytics.js";
+import {
+  getAnalytics,
+  isSupported as isAnalyticsSupported
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-analytics.js";
 import {
   getAuth,
   GoogleAuthProvider,
@@ -13,7 +16,9 @@ import {
   onValue,
   push,
   ref as databaseRef,
-  set
+  remove,
+  set,
+  update
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
 import {
   deleteObject,
@@ -35,12 +40,19 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-getAnalytics(app);
+isAnalyticsSupported()
+  .then((supported) => {
+    if (supported) {
+      getAnalytics(app);
+    }
+  })
+  .catch((error) => console.warn("Could not initialize Firebase Analytics:", error));
 
 const auth = getAuth(app);
 const database = getDatabase(app);
 const storage = getStorage(app);
 const adminEmail = "almattartech@gmail.com";
+let isAdminUser = false;
 
 const contentPage = document.querySelector("[data-content-page]");
 const addContentButton = document.querySelector(".content-add");
@@ -51,9 +63,8 @@ const loginModal = document.getElementById("loginModal");
 const loginForm = document.getElementById("adminLoginForm");
 const loginMessage = document.getElementById("loginMessage");
 const loginButton = document.getElementById("adminLoginButton");
-
-const contactForm = document.getElementById("contactForm");
-const contactStatus = document.getElementById("contactStatus");
+const logoutButton = document.getElementById("adminLogoutButton");
+const navigation = document.querySelector("nav");
 
 function showLoginMessage(message) {
   if (loginMessage) {
@@ -61,18 +72,16 @@ function showLoginMessage(message) {
   }
 }
 
+function closeLoginModal() {
+  if (loginModal) {
+    loginModal.hidden = true;
+  }
+}
+
 function showContentStatus(message) {
   if (contentStatus) {
     contentStatus.textContent = message;
   }
-}
-
-function showContactStatus(message, isError = false) {
-  if (!contactStatus) {
-    return;
-  }
-  contactStatus.textContent = message;
-  contactStatus.classList.toggle("is-error", isError);
 }
 
 function getGoogleLoginErrorMessage(error) {
@@ -98,10 +107,17 @@ async function checkAdminAccess(user) {
   if (!user) {
     return false;
   }
-  return user.email === adminEmail;
+  return user.email?.trim().toLowerCase() === adminEmail && user.emailVerified;
 }
 
-function createContentCard(item) {
+function getAdminAccessErrorMessage(user) {
+  if (user?.email?.trim().toLowerCase() === adminEmail && !user.emailVerified) {
+    return "Please verify the admin email address before signing in.";
+  }
+  return "This account does not have admin access.";
+}
+
+function createContentCard(item, key, page) {
   const card = document.createElement("article");
   card.className = "content-card";
 
@@ -132,6 +148,22 @@ function createContentCard(item) {
   description.textContent = typeof item.description === "string" ? item.description : "";
   card.append(description);
 
+  const deleteButton = document.createElement("button");
+  deleteButton.className = "content-delete";
+  deleteButton.type = "button";
+  deleteButton.textContent = "Delete";
+  deleteButton.hidden = !isAdminUser;
+  deleteButton.addEventListener("click", () => deletePageContent(page, key, item, deleteButton));
+  card.append(deleteButton);
+
+  const editButton = document.createElement("button");
+  editButton.className = "content-edit";
+  editButton.type = "button";
+  editButton.textContent = "Edit description";
+  editButton.hidden = !isAdminUser;
+  editButton.addEventListener("click", () => editContentDescription(page, key, item, editButton));
+  card.append(editButton);
+
   return card;
 }
 
@@ -141,11 +173,11 @@ function loadPageContent(page) {
   }
 
   onValue(databaseRef(database, `content/${page}`), (snapshot) => {
-    const items = Object.values(snapshot.val() || {})
-      .filter((item) => item && typeof item === "object")
-      .sort((a, b) => (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0));
+    const items = Object.entries(snapshot.val() || {})
+      .filter(([, item]) => item && typeof item === "object")
+      .sort(([, a], [, b]) => (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0));
 
-    contentList.replaceChildren(...items.map(createContentCard));
+    contentList.replaceChildren(...items.map(([key, item]) => createContentCard(item, key, page)));
     if (items.length === 0) {
       showContentStatus("No content has been added yet.");
     } else {
@@ -155,6 +187,74 @@ function loadPageContent(page) {
     console.error("Could not load page content:", error);
     showContentStatus("Could not load content. Check the Firebase Realtime Database rules.");
   });
+}
+
+async function deletePageContent(page, key, item, button) {
+  if (!(await checkAdminAccess(auth.currentUser))) {
+    showContentStatus("Verified admin access is required to delete content.");
+    return;
+  }
+  if (!window.confirm("Delete this content? This cannot be undone.")) {
+    return;
+  }
+
+  button.disabled = true;
+  showContentStatus("Deleting content...");
+
+  try {
+    await remove(databaseRef(database, `content/${page}/${key}`));
+  } catch (error) {
+    console.error("Could not delete page content:", error);
+    button.disabled = false;
+    showContentStatus("Could not delete content. Check the Firebase Realtime Database rules.");
+    return;
+  }
+
+  const mediaUrl = typeof item.mediaUrl === "string" ? item.mediaUrl : "";
+  if (mediaUrl) {
+    try {
+      await deleteObject(storageRef(storage, mediaUrl));
+    } catch (error) {
+      if (error.code !== "storage/object-not-found") {
+        console.error("Could not remove the deleted content's media file:", error);
+        showContentStatus("Content was removed, but its media file could not be deleted.");
+        return;
+      }
+    }
+  }
+
+  showContentStatus("Content deleted.");
+}
+
+async function editContentDescription(page, key, item, button) {
+  if (!(await checkAdminAccess(auth.currentUser))) {
+    showContentStatus("Verified admin access is required to edit content.");
+    return;
+  }
+
+  const description = window.prompt("Edit the description:", item.description || "");
+  if (description === null) {
+    return;
+  }
+
+  const updatedDescription = description.trim();
+  if (!updatedDescription || updatedDescription.length > 500) {
+    showContentStatus("Description must contain 1 to 500 characters.");
+    return;
+  }
+
+  button.disabled = true;
+  try {
+    await update(databaseRef(database, `content/${page}/${key}`), {
+      description: updatedDescription
+    });
+    showContentStatus("Description updated.");
+  } catch (error) {
+    console.error("Could not update content description:", error);
+    showContentStatus("Could not update the description. Check the Firebase Realtime Database rules.");
+  } finally {
+    button.disabled = false;
+  }
 }
 
 function getAllowedFile(file, page) {
@@ -255,9 +355,18 @@ onAuthStateChanged(auth, async (user) => {
   if (loginButton) {
     loginButton.hidden = isAdmin;
   }
+  if (logoutButton) {
+    logoutButton.hidden = !isAdmin;
+  }
+  navigation?.classList.toggle("is-admin", isAdmin);
 
-  if (isAdmin && loginModal) {
-    loginModal.hidden = true;
+  isAdminUser = isAdmin;
+  document.querySelectorAll(".content-delete, .content-edit").forEach((button) => {
+    button.hidden = !isAdmin;
+  });
+
+  if (isAdmin) {
+    closeLoginModal();
   }
 
   if (addContentButton) {
@@ -271,9 +380,20 @@ document.getElementById("adminLoginButton")?.addEventListener("click", () => {
   }
 });
 
+if (window.location.hash === "#login" && loginModal) {
+  loginModal.hidden = false;
+}
+
 document.getElementById("closeLoginModal")?.addEventListener("click", () => {
-  if (loginModal) {
-    loginModal.hidden = true;
+  closeLoginModal();
+});
+
+logoutButton?.addEventListener("click", async () => {
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error("Logout error:", error);
+    showLoginMessage("Could not sign out. Please try again.");
   }
 });
 
@@ -288,13 +408,11 @@ loginForm?.addEventListener("submit", async (event) => {
     const { user } = await signInWithEmailAndPassword(auth, email, password);
     if (!(await checkAdminAccess(user))) {
       await signOut(auth);
-      showLoginMessage("This account does not have admin access.");
+      showLoginMessage(getAdminAccessErrorMessage(user));
       return;
     }
 
-    if (loginModal) {
-      loginModal.hidden = true;
-    }
+    closeLoginModal();
     if (loginButton) {
       loginButton.hidden = true;
     }
@@ -311,58 +429,17 @@ document.getElementById("googleLoginBtn")?.addEventListener("click", async () =>
     const { user } = await signInWithPopup(auth, new GoogleAuthProvider());
     if (!(await checkAdminAccess(user))) {
       await signOut(auth);
-      showLoginMessage("This account does not have admin access.");
+      showLoginMessage(getAdminAccessErrorMessage(user));
       return;
     }
 
-    if (loginModal) {
-      loginModal.hidden = true;
-    }
+    closeLoginModal();
     if (loginButton) {
       loginButton.hidden = true;
     }
   } catch (error) {
     console.error("Google login error:", error.code, error.message);
     showLoginMessage(getGoogleLoginErrorMessage(error));
-  }
-});
-
-contactForm?.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  const formData = new FormData(contactForm);
-  const name = String(formData.get("name") || "").trim();
-  const email = String(formData.get("email") || "").trim();
-  const message = String(formData.get("message") || "").trim();
-
-  if (!name || !email || !message) {
-    showContactStatus("الرجاء تعبئة جميع الحقول المطلوبة.", true);
-    return;
-  }
-
-  const submitButton = contactForm.querySelector('button[type="submit"], input[type="submit"]');
-  if (submitButton) {
-    submitButton.disabled = true;
-  }
-  showContactStatus("جاري إرسال الرسالة...");
-
-  try {
-    await push(databaseRef(database, "messages"), {
-      name,
-      email,
-      message,
-      createdAt: Date.now()
-    });
-
-    contactForm.reset();
-    showContactStatus("تم إرسال رسالتك بنجاح! شكراً لك.");
-  } catch (error) {
-    console.error("خطأ في إرسال الرسالة:", error);
-    showContactStatus("حدث خطأ أثناء الإرسال، حاول مجدداً.", true);
-  } finally {
-    if (submitButton) {
-      submitButton.disabled = false;
-    }
   }
 });
 

@@ -14,6 +14,8 @@
 }
 
 body {
+    position: relative;
+    isolation: isolate;
     background-image: url("background.jpg");
     background-size: cover;
     background-position: center;
@@ -22,11 +24,19 @@ body {
     margin: 0; 
     padding: 80px;
 }
+
+.home-hero {
+    width: min(100%, 560px);
+    margin: 5% 0 0 8%;
+}
+
 h1 {
-    text-align: left;
+    text-align: center;
     color: var(--color-white);
-    font-size: 2.5em;
-    margin-left: 8%;
+    font-size: clamp(2.4rem, 4vw, 3.5rem);
+    margin: 6px 0 0;
+    line-height: 1.15;
+    text-shadow: 0 3px 14px rgba(0, 0, 0, 0.8);
 }
 
 p {
@@ -87,11 +97,17 @@ nav img{
     margin-top: -27px;
     align-self: center;
 }
+nav > div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
 .nav-text {
     color: var(--color-accent);
     font-size: 1.2em;
-    margin-left: 10px;
-    padding-top: 0px;
+    white-space: nowrap;
+    transform: translateY(-8px);
 }
 .search {
     margin-left: auto; 
@@ -103,6 +119,71 @@ nav img{
     backdrop-filter: blur(4px);
     margin-top: -15px;
     align-self: center;
+    transition: flex-grow 0.25s ease;
+}
+
+nav.is-admin .search {
+    flex-grow: 1;
+    max-width: 294px;
+}
+
+nav.is-admin .space {
+    margin-left: 140px;
+}
+
+nav.is-admin #adminLogoutButton {
+    margin-left: 0;
+}
+.search-results {
+    position: absolute;
+    top: calc(100% - 10px);
+    right: 50px;
+    box-sizing: border-box;
+    width: min(360px, calc(100vw - 32px));
+    max-height: 55vh;
+    overflow-y: auto;
+    border: 1px solid var(--color-accent-border);
+    border-radius: 10px;
+    background: rgba(23, 20, 17, 0.98);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.search-results[hidden] {
+    display: none;
+}
+
+.search-result {
+    display: grid;
+    gap: 5px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--color-accent-border);
+    color: var(--color-text);
+    text-decoration: none;
+}
+
+.search-result:last-child {
+    border-bottom: 0;
+}
+
+.search-result:hover {
+    background: rgba(201, 139, 78, 0.12);
+}
+
+.search-result span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.search-result small {
+    color: var(--color-accent);
+}
+
+.search-results-status {
+    margin: 0;
+    padding: 12px 14px;
+    color: var(--color-text);
+    font-size: 0.95rem;
 }
 .space {
     margin-left: 190px;
@@ -120,12 +201,17 @@ nav img{
     color: var(--color-accent);
 }
 .pre {
-    margin-left: 12%;
-    margin-top: 5%;
-}
-.g-recaptcha {
-    margin-left: 12%;
-    margin-top: 5%;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    color: var(--color-white);
+    font-family: "Noto Sans Arabic", Tahoma, Arial, sans-serif;
+    font-size: clamp(1.5rem, 2.2vw, 2rem);
+    font-weight: 700;
+    line-height: 1.7;
+    text-align: center;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
 }
 .c-button {
     background-color: var(--color-accent);
@@ -142,6 +228,25 @@ nav img{
 .form {
     color: var(--color-accent);
     margin-right: 40%;
+}
+.form-honeypot {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+.form-note {
+    max-width: 600px;
+    color: var(--color-text);
+    font-size: 0.9rem;
+}
+.form fieldset {
+    border: 1px solid var(--color-accent);
+}
+.form p {
+    color: var(--color-accent);
 }
 .cas{
     box-sizing: border-box;
@@ -172,10 +277,11 @@ nav img{
     top: 30px;
     align-self: center;
 }
-#adminLoginButton {
+#adminLoginButton,
+#adminLogoutButton {
     flex-shrink: 0;
     align-self: center;
-    margin: -10px 0 0 150px;
+    margin: -10px 3px 0 150px;
     padding: 7px 13px;
     border: 1px solid var(--color-accent-border);
     border-radius: 6px;
@@ -188,13 +294,15 @@ nav img{
     transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 
-#adminLoginButton:hover {
+#adminLoginButton:hover,
+#adminLogoutButton:hover {
     background: var(--color-accent);
     color: var(--color-dark);
     box-shadow: 0 0 12px var(--color-accent-glow);
 }
 
-#adminLoginButton:active {
+#adminLoginButton:active,
+#adminLogoutButton:active {
     transform: scale(0.95);
 }
 
@@ -426,17 +534,6 @@ nav img{
     font-size: 1rem;
 }
 
-.contact-status {
-    min-height: 1.25em;
-    margin: 12px 0;
-    color: var(--color-accent);
-    font-size: 1rem;
-}
-
-.contact-status.is-error {
-    color: #ff8a80;
-}
-
 .content-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
@@ -470,9 +567,47 @@ nav img{
     overflow-wrap: anywhere;
 }
 
+.content-delete,
+.content-edit {
+    margin: 0 16px 16px;
+    padding: 8px 12px;
+    border: 1px solid var(--color-accent-border-strong);
+    border-radius: 6px;
+    background: transparent;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.content-delete {
+    border-color: rgba(255, 138, 128, 0.6);
+    color: #ff8a80;
+}
+
+.content-edit {
+    color: var(--color-accent);
+}
+
+.content-delete:hover {
+    background: rgba(255, 138, 128, 0.12);
+}
+
+.content-edit:hover {
+    background: rgba(201, 139, 78, 0.12);
+}
+
 @media (max-width: 900px) {
     body {
         padding: 150px 24px 40px;
+    }
+
+    .form {
+        width: 100%;
+        margin-right: 0;
+    }
+
+    .form fieldset {
+        box-sizing: border-box;
+        min-width: 0;
     }
 
     nav {
@@ -494,11 +629,16 @@ nav img{
         margin-top: 0;
     }
 
+    nav .nav-text {
+        transform: none;
+    }
+
     .search {
         margin: 0;
     }
 
-    #adminLoginButton {
+    #adminLoginButton,
+    #adminLogoutButton {
         margin: 0;
     }
 
@@ -506,13 +646,39 @@ nav img{
 
 @media (max-width: 600px) {
     body {
-        padding: 205px 16px 32px;
+        padding: 160px 16px 32px;
+        background: none;
+        background-color: #080808;
+    }
+
+    body::before {
+        position: fixed;
+        inset: 0;
+        z-index: -2;
+        background: radial-gradient(ellipse at 50% 36%, rgba(201, 139, 78, 0.12), transparent 60%),
+            linear-gradient(180deg, #080808 0%, #171411 50%, #080808 100%);
+        content: "";
+        pointer-events: none;
+    }
+
+    body::after {
+        position: fixed;
+        top: clamp(270px, 32vh, 320px);
+        left: 0;
+        z-index: -1;
+        width: 100%;
+        aspect-ratio: 1375 / 768;
+        background: url("background.jpg") center / 100% 100% no-repeat;
+        content: "";
+        -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+        mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+        pointer-events: none;
     }
 
     nav {
         position: absolute;
         display: grid;
-        grid-template-columns: 48px minmax(0, 1fr) auto;
+        grid-template-columns: minmax(0, 1fr) auto auto;
         grid-template-areas:
             "logo login search"
             "menu menu menu";
@@ -524,13 +690,18 @@ nav img{
 
     nav > div {
         grid-area: logo;
+        min-width: 0;
     }
 
     nav img {
         display: block;
-        width: 46px;
-        height: 46px;
+        width: 36px;
+        height: 36px;
         margin: 0;
+    }
+
+    nav > div {
+        gap: 5px;
     }
 
     nav ul {
@@ -538,51 +709,70 @@ nav img{
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
-        gap: 7px;
+        gap: 6px;
         min-width: 0;
     }
 
-    nav ul .nav-text {
-        flex: 1 0 100%;
-        margin: 0;
-        padding: 0;
-        text-align: center;
-        font-size: 1rem;
+    nav > div .nav-text {
+        overflow: hidden;
+        font-size: 0.68rem;
+        text-overflow: clip;
     }
 
     nav ul button {
-        padding: 7px 10px;
-        font-size: 0.78rem;
+        padding: 7px 8px;
+        font-size: 0.75rem;
     }
 
     .space {
         margin: 0;
     }
 
-    nav #adminLoginButton {
+    nav #adminLoginButton,
+    nav #adminLogoutButton {
         grid-area: login;
         justify-self: end;
         margin: 0;
-        padding: 7px 10px;
+        padding: 6px 7px;
     }
 
     nav .search {
         grid-area: search;
         box-sizing: border-box;
-        width: 112px;
+        width: 80px;
         min-width: 0;
         margin: 0;
         padding: 8px 10px;
     }
 
+    nav.is-admin .search {
+        width: 104px;
+    }
+
+    nav .search-results {
+        top: calc(100% - 10px);
+        right: 12px;
+    }
+
     h1 {
-        margin-left: 0;
-        font-size: clamp(1.8rem, 8vw, 2.5rem);
+        margin-top: 6px;
+        font-size: clamp(2rem, 9vw, 2.7rem);
+        text-align: center;
+    }
+
+    .home-hero {
+        margin: 8px 0 0;
     }
 
     p.pre {
-        margin: 8px 0 0;
-        font-size: clamp(1.6rem, 7vw, 2.2rem);
+        font-size: clamp(16px, 4.5vw, 18px);
+        line-height: 1.5;
+        text-align: center;
+    }
+
+    p {
+        font-size: 1rem;
+        line-height: 1.5;
     }
 
     .content-page {
@@ -595,24 +785,30 @@ nav img{
     }
 
     .form {
+        box-sizing: border-box;
         margin-right: 0;
     }
 
     .form fieldset {
-        min-width: 0;
+        width: 100%;
         padding: 12px;
     }
 
     .cas {
+        display: block;
         width: 100%;
+        max-width: 100%;
         margin-right: 0;
+        margin-top: 8px;
     }
 
     .textarea {
         box-sizing: border-box;
+        display: block;
         width: 100%;
         min-height: 120px;
         padding: 12px;
+        top: 0;
     }
 
     .c-button {

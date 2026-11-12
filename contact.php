@@ -30,9 +30,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $name = trim((string) ($_POST['name'] ?? ''));
 $email = trim((string) ($_POST['email'] ?? ''));
 $message = trim((string) ($_POST['message'] ?? ''));
+$honeypot = trim((string) ($_POST['website'] ?? ''));
+
+if ($honeypot !== '') {
+    showResponse(200, 'Message sent', 'Thank you. Your message has been submitted.');
+}
 
 if (
-    $name === ''
+    strlen($name) > 400
+    || strlen($email) > 254
+    || strlen($message) > 16000
+    || $name === ''
     || preg_match('/^[\p{L}\p{M} ]+$/u', $name) !== 1
     || filter_var($email, FILTER_VALIDATE_EMAIL) === false
     || $message === ''

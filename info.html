@@ -1,26 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
      <meta charset="UTF-8">
      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Almattar-Tech </title>
+    <meta name="description" content="Learn more through technical information and updates from Almattar-Tech.">
+    <title>Information | Almattar-Tech</title>
     <link rel="stylesheet" href="design.css.css">
+    <script src="site-search.js" defer></script>
     <script type="module" src="javascript.js" defer></script>
     </head>
     <body>
-         <nav>
+         <nav data-database-url="https://almattar-tech-default-rtdb.firebaseio.com">
          <div>
                <img src="logo.png" alt="Logo">
+               <span class="nav-text"><i>ALMATTAR-TECH</i></span>
       </div>
         <ul class="nnn">
-            <li class="nav-text"><i>ALMATTAR-TECH</i></li>
             <li class="space"><button onclick="window.location.href='index.html'">HOME</button></li>
             <li><button onclick="window.location.href='news.html'">NEWS</button></li>
-            <li><button onclick="window.location.href='videos.html'">videos</button></li>
+            <li><button onclick="window.location.href='videos.html'">VIDEOS</button></li>
             <li><button onclick="window.location.href='contact.html'">CONTACT</button></li>
             <li><button class="buttons"onclick="window.location.href='info.html'">INFO</button></li>
         </ul>
-        <input class="search" type="search" placeholder="Search...">
+        <button id="adminLoginButton" type="button" onclick="window.location.href='index.html#login'">LOGIN</button>
+        <button id="adminLogoutButton" type="button" hidden>LOGOUT</button>
+        <input class="search" type="search" placeholder="Search site content..." aria-label="Search site content">
     </nav>
     <main class="content-page" data-content-page="info">
         <button class="content-add" type="button" hidden aria-label="Add information content">+</button>

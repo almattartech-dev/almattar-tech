@@ -3,7 +3,7 @@ service firebase.storage {
   match /b/{bucket}/o {
     match /site-content/{page}/{fileName} {
       allow read: if true;
-      allow write: if request.auth != null
+      allow create, update: if request.auth != null
         && request.auth.token.email == 'almattartech@gmail.com'
         && request.auth.token.email_verified == true
         && request.resource != null
@@ -27,6 +27,10 @@ service firebase.storage {
             && request.resource.contentType.matches('video/(mp4|webm)')
           )
         );
+      allow delete: if request.auth != null
+        && request.auth.token.email == 'almattartech@gmail.com'
+        && request.auth.token.email_verified == true
+        && (page == 'news' || page == 'info' || page == 'videos');
     }
   }
 }

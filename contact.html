@@ -1,53 +1,62 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
      <meta charset="UTF-8">
      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Almattar-Tech </title>
+    <meta name="description" content="Contact Almattar-Tech for technical questions and support.">
+    <title>Contact | Almattar-Tech</title>
     <link rel="stylesheet" href="design.css.css">
-    <script type="module" src="contact.js" defer></script>
+    <script src="site-search.js" defer></script>
+    <script type="module" src="javascript.js" defer></script>
     </head>
     <body>
-         <nav>
+         <nav data-database-url="https://almattar-tech-default-rtdb.firebaseio.com">
          <div>
                <img src="logo.png" alt="Logo">
+               <span class="nav-text"><i>ALMATTAR-TECH</i></span>
       </div>
         <ul class="nnn">
-            <li class="nav-text"><i>ALMATTAR-TECH</i></li>
             <li class="space"><button onclick="window.location.href='index.html'">HOME</button></li>
             <li><button onclick="window.location.href='news.html'">NEWS</button></li>
-            <li><button onclick="window.location.href='videos.html'">videos</button></li>
+            <li><button onclick="window.location.href='videos.html'">VIDEOS</button></li>
             <li><button class="buttons"onclick="window.location.href='contact.html'">CONTACT</button></li>
             <li><button onclick="window.location.href='info.html'">INFO</button></li>
         </ul>
-        <input class="search" type="search" placeholder="Search...">
+        <button id="adminLoginButton" type="button" onclick="window.location.href='index.html#login'">LOGIN</button>
+        <button id="adminLogoutButton" type="button" hidden>LOGOUT</button>
+        <input class="search" type="search" placeholder="Search site content..." aria-label="Search site content">
     </nav>
-    <form id="contactForm" method="post" class="form">
+    <main>
+    <form id="contactForm" action="contact.php" method="post" class="form">
         <fieldset>
             <legend><i><b>Message</b></i></legend>
+            <div class="form-honeypot" aria-hidden="true">
+                <label for="website">Leave this field empty</label>
+                <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+            </div>
             <p> 
                 <label class="field" for="name"><b>Name:</b></label>
                 <input id="name" name="name" type="text" required
+                    maxlength="100"
                     pattern="[A-Za-z\u00C0-\u024F\u1E00-\u1EFF\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF ]+"
                     title="Enter your name using letters only."
                     oninput="this.value = this.value.replace(/[^A-Za-z\u00C0-\u024F\u1E00-\u1EFF\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF ]/g, '')" class="cas">
             </p>
             <p> 
                 <label class="field" for="email"><b>Email:</b></label>
-                <input id="email" name="email" type="email" required class="cas">
+                <input id="email" name="email" type="email" maxlength="254" required class="cas">
             </p>
             <p> 
                 <label class="field" for="message"><b>Message:</b></label>
-                <textarea id="message" name="message" required class="textarea"></textarea>
+                <textarea id="message" name="message" maxlength="4000" required class="textarea"></textarea>
             </p>
-            <div class="g-recaptcha" data-sitekey="YOUR_SITE_KEY">
             <p> 
                 <input class="c-button" type="reset" value="Reset">
                 <input class="c-button" type="submit" value="Send">
             </p>
-            </div>
         </fieldset>
     </form>
-    <p id="contactStatus" class="contact-status" aria-live="polite"></p>
+    <p class="form-note">Your name, email, and message will be sent to Almattar-Tech by email so we can respond.</p>
+    </main>
     </body>
 </html>
