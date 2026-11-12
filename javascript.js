@@ -7,6 +7,8 @@ import {
   getAuth,
   GoogleAuthProvider,
   onAuthStateChanged,
+  setPersistence,
+  browserLocalPersistence,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut
@@ -49,6 +51,9 @@ isAnalyticsSupported()
   .catch((error) => console.warn("Could not initialize Firebase Analytics:", error));
 
 const auth = getAuth(app);
+setPersistence(auth, browserLocalPersistence)
+  .catch((error) => console.error("خطأ في حفظ جلسة الدخول:", error));
+
 const database = getDatabase(app);
 const storage = getStorage(app);
 const adminEmail = "almattartech@gmail.com";
@@ -66,6 +71,9 @@ const loginButton = document.getElementById("adminLoginButton");
 const logoutButton = document.getElementById("adminLogoutButton");
 const navigation = document.querySelector("nav");
 
+const contactForm = document.getElementById("contactForm");
+const contactStatus = document.getElementById("contactStatus");
+
 function showLoginMessage(message) {
   if (loginMessage) {
     loginMessage.textContent = message;
@@ -82,6 +90,14 @@ function showContentStatus(message) {
   if (contentStatus) {
     contentStatus.textContent = message;
   }
+}
+
+function showContactStatus(message, isError = false) {
+  if (!contactStatus) {
+    return;
+  }
+  contactStatus.textContent = message;
+  contactStatus.classList.toggle("is-error", isError);
 }
 
 function getGoogleLoginErrorMessage(error) {
@@ -440,6 +456,45 @@ document.getElementById("googleLoginBtn")?.addEventListener("click", async () =>
   } catch (error) {
     console.error("Google login error:", error.code, error.message);
     showLoginMessage(getGoogleLoginErrorMessage(error));
+  }
+});
+
+contactForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const formData = new FormData(contactForm);
+  const name = String(formData.get("name") || "").trim();
+  const email = String(formData.get("email") || "").trim();
+  const message = String(formData.get("message") || "").trim();
+
+  if (!name || !email || !message) {
+    showContactStatus("الرجاء تعبئة جميع الحقول المطلوبة.", true);
+    return;
+  }
+
+  const submitButton = contactForm.querySelector('button[type="submit"], input[type="submit"]');
+  if (submitButton) {
+    submitButton.disabled = true;
+  }
+  showContactStatus("جاري إرسال الرسالة...");
+
+  try {
+    await push(databaseRef(database, "messages"), {
+      name,
+      email,
+      message,
+      createdAt: Date.now()
+    });
+
+    contactForm.reset();
+    showContactStatus("تم إرسال رسالتك بنجاح! شكراً لك.");
+  } catch (error) {
+    console.error("خطأ في إرسال الرسالة:", error);
+    showContactStatus("حدث خطأ أثناء الإرسال، حاول مجدداً.", true);
+  } finally {
+    if (submitButton) {
+      submitButton.disabled = false;
+    }
   }
 });
 
