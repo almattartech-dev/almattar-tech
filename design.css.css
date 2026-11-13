@@ -287,6 +287,16 @@ nav.is-admin #adminLogoutButton {
     color: var(--color-text);
     font-size: 0.9rem;
 }
+.contact-status {
+    min-height: 1.25em;
+    color: var(--color-accent);
+    font-size: 0.95rem;
+}
+
+.contact-status.is-error {
+    color: #ff8a80;
+}
+
 .form fieldset {
     border: 1px solid var(--color-accent);
 }

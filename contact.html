@@ -25,7 +25,7 @@
         <input class="search" type="search" placeholder="Search site content..." aria-label="Search site content">
     </nav>
     <main>
-    <form id="contactForm" action="contact.php" method="post" class="form">
+    <form id="contactForm" method="post" class="form">
         <fieldset>
             <legend><i><b>Message</b></i></legend>
             <div class="form-honeypot" aria-hidden="true">
@@ -54,7 +54,9 @@
             </p>
         </fieldset>
     </form>
-    <p class="form-note">Your name, email, and message will be sent to Almattar-Tech by email so we can respond.</p>
+    <p id="contactStatus" class="contact-status" role="status" aria-live="polite"></p>
+    <p class="form-note">Your message will be saved in Almattar-Tech's Firebase database.</p>
+    <noscript><p class="form-note">Enable JavaScript to send a message.</p></noscript>
     </main>
       <nav class="social-links" aria-label="Social media">
         <ul>

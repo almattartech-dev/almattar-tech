@@ -70,6 +70,8 @@ const loginMessage = document.getElementById("loginMessage");
 const loginButton = document.getElementById("adminLoginButton");
 const logoutButton = document.getElementById("adminLogoutButton");
 const navigation = document.querySelector("nav");
+const contactForm = document.getElementById("contactForm");
+const contactStatus = document.getElementById("contactStatus");
 
 function showLoginMessage(message) {
   if (loginMessage) {
@@ -87,6 +89,14 @@ function showContentStatus(message) {
   if (contentStatus) {
     contentStatus.textContent = message;
   }
+}
+
+function showContactStatus(message, isError = false) {
+  if (!contactStatus) {
+    return;
+  }
+  contactStatus.textContent = message;
+  contactStatus.classList.toggle("is-error", isError);
 }
 
 function getGoogleLoginErrorMessage(error) {
@@ -445,6 +455,53 @@ document.getElementById("googleLoginBtn")?.addEventListener("click", async () =>
   } catch (error) {
     console.error("Google login error:", error.code, error.message);
     showLoginMessage(getGoogleLoginErrorMessage(error));
+  }
+});
+
+contactForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const formData = new FormData(contactForm);
+  const name = String(formData.get("name") || "").trim();
+  const email = String(formData.get("email") || "").trim();
+  const message = String(formData.get("message") || "").trim();
+  const honeypot = String(formData.get("website") || "").trim();
+
+  if (!name || !email || !message) {
+    showContactStatus("الرجاء تعبئة جميع الحقول المطلوبة.", true);
+    return;
+  }
+
+  if (honeypot) {
+    contactForm.reset();
+    showContactStatus("تم إرسال رسالتك بنجاح! شكراً لك.");
+    return;
+  }
+
+  const submitButton = contactForm.querySelector('button[type="submit"], input[type="submit"]');
+  if (submitButton) {
+    submitButton.disabled = true;
+  }
+  showContactStatus("جاري إرسال الرسالة...");
+
+  try {
+    await push(databaseRef(database, "messages"), {
+      name,
+      email,
+      message,
+      website: "",
+      createdAt: Date.now()
+    });
+
+    contactForm.reset();
+    showContactStatus("تم إرسال رسالتك بنجاح! شكراً لك.");
+  } catch (error) {
+    console.error("خطأ في إرسال الرسالة:", error);
+    showContactStatus("حدث خطأ أثناء الإرسال، حاول مجدداً.", true);
+  } finally {
+    if (submitButton) {
+      submitButton.disabled = false;
+    }
   }
 });
 
