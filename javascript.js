@@ -24,11 +24,10 @@ import {
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-database.js";
 import {
   deleteObject,
-  getDownloadURL,
   getStorage,
-  ref as storageRef,
-  uploadBytes
+  ref as storageRef
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-storage.js";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC9ZpiCHP-AJMHvI1EfnTkTXkovs4-7OE0",
@@ -56,6 +55,14 @@ setPersistence(auth, browserLocalPersistence)
 
 const database = getDatabase(app);
 const storage = getStorage(app);
+const supabase = createClient(
+  "https://thahdmqouequojtccldz.supabase.co",
+  "sb_publishable_hrzcBWpLyQtMzh83fuYFJw_84Ra8tga",
+  {
+    accessToken: async () => auth.currentUser?.getIdToken() ?? null
+  }
+);
+const newsMediaBucket = "news-media";
 const adminEmail = "almattartech@gmail.com";
 let isAdminUser = false;
 
@@ -243,10 +250,9 @@ async function deletePageContent(page, key, item, button) {
     return;
   }
 
-  const mediaUrl = typeof item.mediaUrl === "string" ? item.mediaUrl : "";
-  if (mediaUrl) {
+  if (typeof item.mediaUrl === "string" && item.mediaUrl) {
     try {
-      await deleteObject(storageRef(storage, mediaUrl));
+      await deleteContentMedia(item);
     } catch (error) {
       if (error.code !== "storage/object-not-found") {
         console.error("Could not remove the deleted content's media file:", error);
@@ -257,6 +263,42 @@ async function deletePageContent(page, key, item, button) {
   }
 
   showContentStatus("Content deleted.");
+}
+
+async function deleteContentMedia(item) {
+  if (item.mediaProvider === "supabase" && typeof item.mediaPath === "string") {
+    await removeSupabaseMedia(item.mediaPath);
+    return;
+  }
+
+  await deleteObject(storageRef(storage, item.mediaUrl));
+}
+
+async function uploadSupabaseMedia(page, itemKey, file) {
+  getAllowedFile(file, page);
+  const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const mediaPath = `${page}/${itemKey}-${safeFileName}`;
+  const { error } = await supabase.storage
+    .from(newsMediaBucket)
+    .upload(mediaPath, file, { contentType: file.type, upsert: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    mediaPath,
+    mediaUrl: supabase.storage.from(newsMediaBucket).getPublicUrl(mediaPath).data.publicUrl,
+    mediaType: file.type.startsWith("image/") ? "image" : "video",
+    mediaProvider: "supabase"
+  };
+}
+
+async function removeSupabaseMedia(mediaPath) {
+  const { error } = await supabase.storage.from(newsMediaBucket).remove([mediaPath]);
+  if (error) {
+    throw error;
+  }
 }
 
 async function editContentDescription(page, key, item, button) {
@@ -326,12 +368,13 @@ async function saveNewsArticle(form) {
   }
 
   submitButton.disabled = true;
-  let uploadedFileRef;
-  let uploadCompleted = false;
+  let uploadedMediaPath = "";
+  let mediaUploadCompleted = false;
   let articleSaved = false;
   const previousMediaUrl = typeof editingNewsItem?.mediaUrl === "string"
     ? editingNewsItem.mediaUrl
     : "";
+  const previousMediaItem = editingNewsItem;
 
   try {
     const articleRef = editingNewsKey
@@ -341,16 +384,22 @@ async function saveNewsArticle(form) {
     let mediaType = typeof editingNewsItem?.mediaType === "string"
       ? editingNewsItem.mediaType
       : "";
+    let mediaProvider = typeof editingNewsItem?.mediaProvider === "string"
+      ? editingNewsItem.mediaProvider
+      : "";
+    let mediaPath = typeof editingNewsItem?.mediaPath === "string"
+      ? editingNewsItem.mediaPath
+      : "";
 
     if (file) {
-      getAllowedFile(file, "news");
-      const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-      uploadedFileRef = storageRef(storage, `site-content/news/${articleRef.key}-${safeFileName}`);
       showContentStatus("Uploading media...");
-      await uploadBytes(uploadedFileRef, file, { contentType: file.type });
-      uploadCompleted = true;
-      mediaUrl = await getDownloadURL(uploadedFileRef);
-      mediaType = file.type.startsWith("image/") ? "image" : "video";
+      const uploadedMedia = await uploadSupabaseMedia("news", articleRef.key, file);
+      uploadedMediaPath = uploadedMedia.mediaPath;
+      mediaUploadCompleted = true;
+      mediaUrl = uploadedMedia.mediaUrl;
+      mediaType = uploadedMedia.mediaType;
+      mediaProvider = uploadedMedia.mediaProvider;
+      mediaPath = uploadedMedia.mediaPath;
     } else {
       showContentStatus(isEditing ? "Updating news..." : "Publishing news...");
     }
@@ -364,6 +413,10 @@ async function saveNewsArticle(form) {
     if (mediaUrl && mediaType) {
       article.mediaUrl = mediaUrl;
       article.mediaType = mediaType;
+      if (mediaProvider === "supabase" && mediaPath) {
+        article.mediaProvider = mediaProvider;
+        article.mediaPath = mediaPath;
+      }
     }
 
     await set(articleRef, article);
@@ -372,7 +425,7 @@ async function saveNewsArticle(form) {
 
     if (file && previousMediaUrl && previousMediaUrl !== mediaUrl) {
       try {
-        await deleteObject(storageRef(storage, previousMediaUrl));
+        await deleteContentMedia(previousMediaItem);
       } catch (error) {
         if (error.code !== "storage/object-not-found") {
           console.error("News was updated, but the previous media file could not be deleted:", error);
@@ -385,9 +438,9 @@ async function saveNewsArticle(form) {
     showContentStatus(isEditing ? "News updated." : "News published.");
   } catch (error) {
     console.error("Could not save news article:", error);
-    if (uploadedFileRef && uploadCompleted && !articleSaved) {
+    if (uploadedMediaPath && mediaUploadCompleted && !articleSaved) {
       try {
-        await deleteObject(uploadedFileRef);
+        await removeSupabaseMedia(uploadedMediaPath);
       } catch (cleanupError) {
         console.error("Could not remove the incomplete news media upload:", cleanupError);
       }
@@ -404,7 +457,7 @@ function getAllowedFile(file, page) {
   const isImage = ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type);
   const isVideo = file.type === "video/mp4" || file.type === "video/webm";
   const validType = page === "videos" ? isVideo : isImage || isVideo;
-  const maxSize = isImage ? 20 * 1024 * 1024 : 100 * 1024 * 1024;
+  const maxSize = isImage ? 20 * 1024 * 1024 : 50 * 1024 * 1024;
 
   if (!validType) {
     throw new Error(page === "videos"
@@ -412,7 +465,8 @@ function getAllowedFile(file, page) {
       : "Choose an image or an MP4/WebM video.");
   }
   if (file.size > maxSize) {
-    throw new Error(`The selected file is too large. Maximum size: ${isImage ? "20 MB" : "100 MB"}.`);
+    const maxSizeLabel = isImage ? "20 MB" : "50 MB";
+    throw new Error(`The selected file is too large. Maximum size: ${maxSizeLabel}.`);
   }
 }
 
@@ -446,8 +500,8 @@ async function addPageContent(event) {
     return;
   }
 
-  let uploadedFileRef;
-  let uploadCompleted = false;
+  let uploadedMedia;
+  let itemSaved = false;
   submitButton.disabled = true;
   showContentStatus("Uploading content...");
 
@@ -457,29 +511,24 @@ async function addPageContent(event) {
       return;
     }
 
-    getAllowedFile(file, page);
     const itemRef = push(databaseRef(database, `content/${page}`));
-    const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-    uploadedFileRef = storageRef(storage, `site-content/${page}/${itemRef.key}-${safeFileName}`);
-    await uploadBytes(uploadedFileRef, file, { contentType: file.type });
-    uploadCompleted = true;
-    const mediaUrl = await getDownloadURL(uploadedFileRef);
+    uploadedMedia = await uploadSupabaseMedia(page, itemRef.key, file);
 
     await set(itemRef, {
       description,
-      mediaUrl,
-      mediaType: file.type.startsWith("image/") ? "image" : "video",
+      ...uploadedMedia,
       createdAt: Date.now()
     });
+    itemSaved = true;
 
     contentForm.reset();
     contentForm.hidden = true;
     showContentStatus("Content added successfully.");
   } catch (error) {
     console.error("Could not add page content:", error);
-    if (uploadCompleted && uploadedFileRef) {
+    if (uploadedMedia && !itemSaved) {
       try {
-        await deleteObject(uploadedFileRef);
+        await removeSupabaseMedia(uploadedMedia.mediaPath);
       } catch (cleanupError) {
         console.error("Could not remove the incomplete uploaded file:", cleanupError);
       }
