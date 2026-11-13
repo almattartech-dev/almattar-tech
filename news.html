@@ -26,20 +26,33 @@
     </nav>
     <main class="content-page" data-content-page="news">
         <button class="content-add" type="button" hidden aria-label="Add news content">+</button>
-        <form class="content-form" hidden>
-            <label>
-                Image or video
-                <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm" required>
-            </label>
-            <label>
-                Description
-                <textarea maxlength="500" required></textarea>
-            </label>
-            <div class="content-form-actions">
-                <button type="submit">Add</button>
-                <button class="content-form-cancel" type="button">Cancel</button>
-            </div>
-        </form>
+        <dialog class="content-dialog" aria-labelledby="newsEditorTitle">
+            <form class="content-form">
+                <h2 id="newsEditorTitle">Add news</h2>
+                <label>
+                    Title
+                    <input name="title" maxlength="120" required>
+                </label>
+                <label>
+                    Content
+                    <textarea name="description" maxlength="5000" required></textarea>
+                </label>
+                <label>
+                    Optional image or video
+                    <input
+                        type="file"
+                        name="media"
+                        accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm">
+                </label>
+                <p class="content-editor-media-status" aria-live="polite">
+                    You can publish without selecting a file.
+                </p>
+                <div class="content-form-actions">
+                    <button type="submit">Publish</button>
+                    <button class="content-form-cancel" type="button">Cancel</button>
+                </div>
+            </form>
+        </dialog>
         <p class="content-status" aria-live="polite"></p>
         <section class="content-list" aria-label="News content"></section>
     </main>

@@ -21,7 +21,11 @@ function getSiteContent() {
         return pages.flatMap((page) =>
           Object.values(data?.[page] || {})
             .filter((item) => item && typeof item === "object" && typeof item.description === "string")
-            .map((item) => ({ page, description: item.description }))
+            .map((item) => ({
+              page,
+              title: typeof item.title === "string" ? item.title : "",
+              description: item.description
+            }))
         );
       })
       .catch((error) => {
@@ -51,7 +55,7 @@ if (siteSearchInput && siteSearchNav) {
     try {
       const content = await getSiteContent();
       const matches = content.filter((item) =>
-        item.description.toLocaleLowerCase().includes(query)
+        `${item.title} ${item.description}`.toLocaleLowerCase().includes(query)
       ).slice(0, 20);
 
       resultsPanel.replaceChildren();
@@ -67,7 +71,9 @@ if (siteSearchInput && siteSearchNav) {
         link.href = `${item.page}.html?search=${encodeURIComponent(query)}`;
 
         const description = document.createElement("span");
-        description.textContent = item.description;
+        description.textContent = item.title
+          ? `${item.title} — ${item.description}`
+          : item.description;
         const pageLabel = document.createElement("small");
         pageLabel.textContent = item.page.toUpperCase();
         link.append(description, pageLabel);

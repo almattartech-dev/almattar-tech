@@ -62,6 +62,7 @@ let isAdminUser = false;
 const contentPage = document.querySelector("[data-content-page]");
 const addContentButton = document.querySelector(".content-add");
 const contentForm = document.querySelector(".content-form");
+const contentDialog = document.querySelector(".content-dialog");
 const contentList = document.querySelector(".content-list");
 const contentStatus = document.querySelector(".content-status");
 const loginModal = document.getElementById("loginModal");
@@ -72,6 +73,8 @@ const logoutButton = document.getElementById("adminLogoutButton");
 const navigation = document.querySelector("nav");
 const contactForm = document.getElementById("contactForm");
 const contactStatus = document.getElementById("contactStatus");
+let editingNewsKey = null;
+let editingNewsItem = null;
 
 function showLoginMessage(message) {
   if (loginMessage) {
@@ -136,6 +139,13 @@ function createContentCard(item, key, page) {
   const card = document.createElement("article");
   card.className = "content-card";
 
+  if (typeof item.title === "string" && item.title) {
+    const title = document.createElement("h4");
+    title.className = "content-title";
+    title.textContent = item.title;
+    card.append(title);
+  }
+
   const mediaUrl = typeof item.mediaUrl === "string" ? item.mediaUrl : "";
   let validMediaUrl = false;
   try {
@@ -174,9 +184,17 @@ function createContentCard(item, key, page) {
   const editButton = document.createElement("button");
   editButton.className = "content-edit";
   editButton.type = "button";
-  editButton.textContent = "Edit description";
+  editButton.textContent = page === "news" && typeof item.title === "string"
+    ? "Edit article"
+    : "Edit description";
   editButton.hidden = !isAdminUser;
-  editButton.addEventListener("click", () => editContentDescription(page, key, item, editButton));
+  editButton.addEventListener("click", () => {
+    if (page === "news" && typeof item.title === "string") {
+      openNewsEditor(item, key);
+    } else {
+      editContentDescription(page, key, item, editButton);
+    }
+  });
   card.append(editButton);
 
   return card;
@@ -272,6 +290,116 @@ async function editContentDescription(page, key, item, button) {
   }
 }
 
+function openNewsEditor(item = null, key = null) {
+  if (!contentForm || !contentDialog) {
+    return;
+  }
+
+  contentForm.reset();
+  editingNewsKey = key;
+  editingNewsItem = item;
+  contentForm.querySelector('[name="title"]').value = item?.title || "";
+  contentForm.querySelector('[name="description"]').value = item?.description || "";
+  contentForm.querySelector("#newsEditorTitle").textContent = item ? "Edit news" : "Add news";
+  contentForm.querySelector('[type="submit"]').textContent = item ? "Save changes" : "Publish";
+  contentForm.querySelector(".content-editor-media-status").textContent = item?.mediaUrl
+    ? "Current media will stay unless you choose a replacement."
+    : "You can publish without selecting a file.";
+  contentDialog.showModal();
+}
+
+async function saveNewsArticle(form) {
+  if (!(await checkAdminAccess(auth.currentUser))) {
+    showContentStatus("Verified admin access is required to publish news.");
+    return;
+  }
+
+  const isEditing = editingNewsKey !== null;
+  const title = form.querySelector('[name="title"]').value.trim();
+  const description = form.querySelector('[name="description"]').value.trim();
+  const file = form.querySelector('input[type="file"]').files[0];
+  const submitButton = form.querySelector('[type="submit"]');
+
+  if (!title || title.length > 120 || !description || description.length > 5000) {
+    showContentStatus("Enter a title (up to 120 characters) and content (up to 5000 characters).");
+    return;
+  }
+
+  submitButton.disabled = true;
+  let uploadedFileRef;
+  let uploadCompleted = false;
+  let articleSaved = false;
+  const previousMediaUrl = typeof editingNewsItem?.mediaUrl === "string"
+    ? editingNewsItem.mediaUrl
+    : "";
+
+  try {
+    const articleRef = editingNewsKey
+      ? databaseRef(database, `content/news/${editingNewsKey}`)
+      : push(databaseRef(database, "content/news"));
+    let mediaUrl = previousMediaUrl;
+    let mediaType = typeof editingNewsItem?.mediaType === "string"
+      ? editingNewsItem.mediaType
+      : "";
+
+    if (file) {
+      getAllowedFile(file, "news");
+      const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      uploadedFileRef = storageRef(storage, `site-content/news/${articleRef.key}-${safeFileName}`);
+      showContentStatus("Uploading media...");
+      await uploadBytes(uploadedFileRef, file, { contentType: file.type });
+      uploadCompleted = true;
+      mediaUrl = await getDownloadURL(uploadedFileRef);
+      mediaType = file.type.startsWith("image/") ? "image" : "video";
+    } else {
+      showContentStatus(isEditing ? "Updating news..." : "Publishing news...");
+    }
+
+    const article = {
+      title,
+      description,
+      createdAt: editingNewsItem?.createdAt || Date.now()
+    };
+
+    if (mediaUrl && mediaType) {
+      article.mediaUrl = mediaUrl;
+      article.mediaType = mediaType;
+    }
+
+    await set(articleRef, article);
+    articleSaved = true;
+    contentDialog.close();
+
+    if (file && previousMediaUrl && previousMediaUrl !== mediaUrl) {
+      try {
+        await deleteObject(storageRef(storage, previousMediaUrl));
+      } catch (error) {
+        if (error.code !== "storage/object-not-found") {
+          console.error("News was updated, but the previous media file could not be deleted:", error);
+          showContentStatus("News was saved, but its previous media file could not be deleted.");
+          return;
+        }
+      }
+    }
+
+    showContentStatus(isEditing ? "News updated." : "News published.");
+  } catch (error) {
+    console.error("Could not save news article:", error);
+    if (uploadedFileRef && uploadCompleted && !articleSaved) {
+      try {
+        await deleteObject(uploadedFileRef);
+      } catch (cleanupError) {
+        console.error("Could not remove the incomplete news media upload:", cleanupError);
+      }
+    }
+    showContentStatus(error instanceof Error
+      ? error.message
+      : "Could not save news. Check the Firebase setup and Realtime Database rules.");
+  } finally {
+    submitButton.disabled = false;
+  }
+}
+
 function getAllowedFile(file, page) {
   const isImage = ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type);
   const isVideo = file.type === "video/mp4" || file.type === "video/webm";
@@ -294,8 +422,13 @@ async function addPageContent(event) {
     return;
   }
 
-  const user = auth.currentUser;
   const page = contentPage.dataset.contentPage;
+  if (page === "news") {
+    await saveNewsArticle(contentForm);
+    return;
+  }
+
+  const user = auth.currentUser;
   const fileInput = contentForm.querySelector('input[type="file"]');
   const descriptionInput = contentForm.querySelector('textarea');
   const submitButton = contentForm.querySelector('[type="submit"]');
@@ -506,16 +639,36 @@ contactForm?.addEventListener("submit", async (event) => {
 });
 
 addContentButton?.addEventListener("click", () => {
+  if (contentPage?.dataset.contentPage === "news") {
+    openNewsEditor();
+    return;
+  }
+
   if (contentForm) {
     contentForm.hidden = !contentForm.hidden;
   }
 });
 
 document.querySelector(".content-form-cancel")?.addEventListener("click", () => {
+  if (contentDialog?.open) {
+    contentDialog.close();
+    return;
+  }
+
   if (contentForm) {
     contentForm.reset();
     contentForm.hidden = true;
   }
+});
+
+contentDialog?.addEventListener("close", () => {
+  contentForm?.reset();
+  const mediaStatus = contentForm?.querySelector(".content-editor-media-status");
+  if (mediaStatus) {
+    mediaStatus.textContent = "You can publish without selecting a file.";
+  }
+  editingNewsKey = null;
+  editingNewsItem = null;
 });
 
 contentForm?.addEventListener("submit", addPageContent);
