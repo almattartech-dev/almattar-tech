@@ -1,12 +1,25 @@
+/*
+ * Quick index
+ * 1. Theme and shared page styles
+ * 2. Home page
+ * 3. Navigation and search
+ * 4. Social links
+ * 5. Contact form
+ * 6. Admin login
+ * 7. Content pages (info, news, videos)
+ * 8. Responsive layouts
+ */
+
+/* 1. Theme and shared page styles */
 :root {
-    --color-accent: #c98b4e;
+    --color-accent: #b77f43;
     --color-text: #e0e0e0;
     --color-dark: #171411;
     --color-white: #ffffff;
     --color-overlay: rgba(0, 0, 0, 0.68);
-    --color-accent-border: rgba(201, 139, 78, 0.4);
-    --color-accent-border-strong: rgba(201, 139, 78, 0.7);
-    --color-accent-glow: rgba(201, 139, 78, 0.5);
+    --color-accent-border: rgba(183, 127, 67, 0.42);
+    --color-accent-border-strong: rgba(183, 127, 67, 0.72);
+    --color-accent-glow: rgba(183, 127, 67, 0.46);
     --color-google-blue: #4285f4;
     --color-google-green: #34a853;
     --color-google-yellow: #fbbc05;
@@ -16,18 +29,241 @@
 body {
     position: relative;
     isolation: isolate;
-    background-image: url("background.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    background: #080808;
     min-height: 100vh;   
     margin: 0; 
     padding: 80px;
 }
 
+body::before {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background-image: url("bg.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    content: "";
+    pointer-events: none;
+}
+
+::selection {
+    background: var(--color-accent);
+    color: var(--color-dark);
+}
+
+/* 2. Home page */
 .home-hero {
+    position: relative;
+    isolation: isolate;
     width: min(100%, 560px);
     margin: 5% 0 0 8%;
+}
+
+.hero-ambient {
+    position: absolute;
+    inset: -145px -230px -170px -180px;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.ambient-ring {
+    position: absolute;
+    border: 1px solid rgba(201, 139, 78, 0.17);
+    border-radius: 50%;
+    box-shadow:
+        inset 0 0 28px rgba(201, 139, 78, 0.04),
+        0 0 32px rgba(201, 139, 78, 0.05);
+    animation: ringPulse 7s ease-in-out infinite;
+}
+
+.ring-one {
+    top: 34%;
+    left: 30%;
+    width: 390px;
+    height: 390px;
+}
+
+.ring-two {
+    top: 43%;
+    left: 39%;
+    width: 250px;
+    height: 250px;
+    animation-delay: -3.5s;
+}
+
+.ambient-spark {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    box-shadow: 0 0 14px var(--color-accent-glow);
+    animation: sparkFloat 5s ease-in-out infinite;
+}
+
+.spark-one {
+    top: 38%;
+    left: 22%;
+}
+
+.spark-two {
+    top: 62%;
+    left: 68%;
+    animation-delay: -1.8s;
+}
+
+.spark-three {
+    top: 28%;
+    left: 72%;
+    animation-delay: -3.2s;
+}
+
+.home-hero .pre {
+    opacity: 0;
+    animation: heroCopyReveal 0.72s cubic-bezier(0.16, 1, 0.3, 1) 0.22s forwards;
+}
+
+.home-hero h1 {
+    position: relative;
+    opacity: 0;
+    text-shadow: 0 4px 18px rgba(0, 0, 0, 0.88);
+    animation: heroTitleReveal 0.88s cubic-bezier(0.16, 1, 0.3, 1) 0.48s forwards;
+}
+
+.home-hero h1::after {
+    position: absolute;
+    right: 12%;
+    bottom: -14px;
+    left: 12%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+    box-shadow: 0 0 12px var(--color-accent-glow);
+    content: "";
+    transform: scaleX(0);
+    animation: titleLineReveal 1s ease 1.25s forwards;
+}
+
+.hero-eyebrow {
+    width: fit-content;
+    margin: 0 auto 14px;
+    padding: 7px 13px;
+    border: 1px solid var(--color-accent-border);
+    border-radius: 999px;
+    background: rgba(23, 20, 17, 0.58);
+    color: var(--color-text);
+    font-family: "Noto Sans Arabic", Tahoma, Arial, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    animation: heroCopyReveal 0.68s cubic-bezier(0.16, 1, 0.3, 1) 0.12s forwards;
+}
+
+.status-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-left: 7px;
+    border-radius: 50%;
+    background: #54d18a;
+    box-shadow: 0 0 12px rgba(84, 209, 138, 0.8);
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+.hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 26px;
+    opacity: 0;
+    animation: heroActionsReveal 0.68s cubic-bezier(0.16, 1, 0.3, 1) 0.82s forwards;
+}
+
+.hero-primary,
+.hero-secondary {
+    display: inline-flex;
+    min-height: 48px;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border-radius: 999px;
+    font-family: "Noto Sans Arabic", Tahoma, Arial, sans-serif;
+    font-weight: 800;
+    text-decoration: none;
+    transition: transform 0.28s ease, box-shadow 0.28s ease, background 0.28s ease;
+}
+
+.hero-primary {
+    min-width: 170px;
+    gap: 10px;
+    padding: 12px 22px;
+    background: var(--color-accent);
+    color: var(--color-dark);
+    box-shadow: 0 10px 30px rgba(201, 139, 78, 0.22);
+}
+
+.hero-primary span {
+    font-size: 1.25em;
+    transition: transform 0.28s ease;
+}
+
+.hero-primary:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 34px rgba(201, 139, 78, 0.42);
+}
+
+.hero-primary:hover span {
+    transform: translateX(-5px);
+}
+
+.hero-secondary {
+    min-width: 150px;
+    padding: 12px 20px;
+    border: 1px solid var(--color-accent-border-strong);
+    background: rgba(23, 20, 17, 0.72);
+    color: var(--color-white);
+    backdrop-filter: blur(8px);
+}
+
+.hero-secondary:hover {
+    transform: translateY(-4px);
+    border-color: var(--color-accent);
+    background: rgba(201, 139, 78, 0.12);
+}
+
+.hero-primary:focus-visible,
+.hero-secondary:focus-visible {
+    outline: 3px solid rgba(201, 139, 78, 0.55);
+    outline-offset: 4px;
+}
+
+.hero-proof {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 16px;
+    color: rgba(224, 224, 224, 0.78);
+    font-family: "Noto Sans Arabic", Tahoma, Arial, sans-serif;
+    font-size: 0.78rem;
+    opacity: 0;
+    animation: heroActionsReveal 0.68s cubic-bezier(0.16, 1, 0.3, 1) 1s forwards;
+}
+
+.hero-proof span {
+    display: flex;
+    align-items: center;
+}
+
+.hero-proof span:not(:last-child)::after {
+    width: 3px;
+    height: 3px;
+    margin-right: 18px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    content: "";
 }
 
 h1 {
@@ -45,8 +281,9 @@ p {
     font-size: 2.5em;
 }
 
+/* 3. Navigation and search */
 nav {
-    position: absolute; 
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
@@ -57,6 +294,10 @@ nav {
     justify-content: flex-start; 
     align-items: center;
     z-index: 1000;
+}
+
+nav[data-database-url] {
+    top: -3px;
 }
 
 nav ul {
@@ -84,6 +325,7 @@ nav button:hover {
     background: var(--color-accent);
     color: var(--color-dark);
     box-shadow: 0 0 12px var(--color-accent-glow);
+    transform: translateY(-2px);
 }
 
 nav button:active {
@@ -96,13 +338,219 @@ nav img{
     vertical-align: middle;
     margin-top: -27px;
     align-self: center;
+    right: -15px;
 }
 nav > div {
+    position: relative;
+    left: 5px;
     display: flex;
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
 }
+nav > div > img {
+    position: relative;
+    border-radius: 50%;
+    filter: drop-shadow(0 0 4px rgba(201, 139, 78, 0.45));
+    transform-origin: center;
+    animation:
+        logoEntrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) both,
+        logoFloat 3.2s ease-in-out 1.2s infinite,
+        logoGlow 2.4s ease-in-out 1.2s infinite;
+    transition: filter 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+nav > div > img:hover {
+    filter: drop-shadow(0 0 16px rgba(201, 139, 78, 0.95)) brightness(1.12);
+    transform: rotate(-5deg) scale(1.12);
+}
+
+nav .nav-text {
+    opacity: 0;
+    animation: navReveal 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.25s forwards;
+}
+
+nav ul li {
+    opacity: 0;
+    animation: navItemReveal 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+nav ul li:nth-child(1) { animation-delay: 0.45s; }
+nav ul li:nth-child(2) { animation-delay: 0.52s; }
+nav ul li:nth-child(3) { animation-delay: 0.59s; }
+nav ul li:nth-child(4) { animation-delay: 0.66s; }
+nav ul li:nth-child(5) { animation-delay: 0.73s; }
+
+nav button {
+    position: relative;
+    overflow: hidden;
+}
+
+nav button::after {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 20%, rgba(255, 255, 255, 0.22) 50%, transparent 80%);
+    content: "";
+    transform: translateX(-130%);
+    transition: transform 0.55s ease;
+}
+
+nav button:hover::after {
+    transform: translateX(130%);
+}
+
+@keyframes logoEntrance {
+    0% {
+        opacity: 0;
+        transform: translateY(-35px) scale(0.45) rotate(-180deg);
+        filter: blur(8px) drop-shadow(0 0 0 transparent);
+    }
+    65% {
+        opacity: 1;
+        transform: translateY(5px) scale(1.12) rotate(8deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1) rotate(0);
+    }
+}
+
+@keyframes logoFloat {
+    0%, 100% {
+        translate: 0 0;
+    }
+    50% {
+        translate: 0 6px;
+    }
+}
+
+@keyframes logoGlow {
+    0%, 100% {
+        filter: drop-shadow(0 0 4px rgba(201, 139, 78, 0.45));
+    }
+    50% {
+        filter: drop-shadow(0 0 14px rgba(201, 139, 78, 0.95));
+    }
+}
+
+@keyframes heroCopyReveal {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+        filter: blur(3px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+@keyframes heroTitleReveal {
+    from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.985);
+        letter-spacing: 0.06em;
+        filter: blur(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        letter-spacing: 0;
+        filter: blur(0);
+    }
+}
+
+@keyframes titleLineReveal {
+    to { transform: scaleX(1); }
+}
+
+@keyframes ringPulse {
+    0%, 100% {
+        opacity: 0.35;
+        transform: scale(0.94);
+    }
+    50% {
+        opacity: 0.9;
+        transform: scale(1.06);
+    }
+}
+
+@keyframes sparkFloat {
+    0%, 100% {
+        opacity: 0.25;
+        transform: translateY(12px) scale(0.6);
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(-16px) scale(1);
+    }
+}
+
+@keyframes navReveal {
+    from { opacity: 0; transform: translateX(-12px) translateY(-8px); }
+    to { opacity: 1; transform: translateX(0) translateY(-8px); }
+}
+
+@keyframes navItemReveal {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes socialReveal {
+    from { opacity: 0; transform: translateY(24px) scale(0.7); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes heroActionsReveal {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes statusPulse {
+    0%, 100% { opacity: 0.55; transform: scale(0.85); }
+    50% { opacity: 1; transform: scale(1.15); }
+}
+
+@keyframes pageReveal {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cardReveal {
+    from { opacity: 0; transform: translateY(20px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    nav > div > img {
+        animation: none;
+        transition: none;
+    }
+
+    nav .nav-text,
+    nav ul li,
+    .home-hero .pre,
+    .home-hero h1,
+    .hero-eyebrow,
+    .hero-actions,
+    .hero-proof,
+    .content-page,
+    .content-card,
+    .form fieldset,
+    .social-links a,
+    .ambient-ring,
+    .ambient-spark {
+        animation: none;
+        opacity: 1;
+    }
+
+    .home-hero h1::after {
+        transform: scaleX(1);
+        animation: none;
+    }
+}
+
 .nav-text {
     color: var(--color-accent);
     font-size: 1.2em;
@@ -110,6 +558,8 @@ nav > div {
     transform: translateY(-8px);
 }
 .search {
+    position: relative;
+    left: -20px;
     margin-left: auto; 
     padding: 8px 40px;
     border-radius: 25px;
@@ -185,6 +635,8 @@ nav.is-admin #adminLogoutButton {
     color: var(--color-text);
     font-size: 0.95rem;
 }
+
+/* Navigation labels and buttons */
 .space {
     margin-left: 190px;
 
@@ -200,6 +652,8 @@ nav.is-admin #adminLogoutButton {
 .tech{
     color: var(--color-accent);
 }
+
+/* 4. Social links */
 .social-links {
     position: fixed;
     top: auto;
@@ -225,8 +679,14 @@ nav.is-admin #adminLogoutButton {
     border-radius: 50%;
     background: rgba(23, 20, 17, 0.88);
     backdrop-filter: blur(4px);
+    opacity: 0;
     transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    animation: socialReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+.social-links li:nth-child(1) a { animation-delay: 1.15s; }
+.social-links li:nth-child(2) a { animation-delay: 1.28s; }
+.social-links li:nth-child(3) a { animation-delay: 1.41s; }
 
 .social-links a:hover {
     background: var(--color-accent);
@@ -245,6 +705,11 @@ nav.is-admin #adminLogoutButton {
     margin: 0;
     object-fit: contain;
 }
+
+.social-links li:first-child img {
+    width: 38px;
+    height: 38px;
+}
 .pre {
     box-sizing: border-box;
     width: 100%;
@@ -258,6 +723,8 @@ nav.is-admin #adminLogoutButton {
     text-align: center;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95);
 }
+
+/* 5. Contact form */
 .c-button {
     background-color: var(--color-accent);
     color: var(--color-dark);
@@ -265,14 +732,37 @@ nav.is-admin #adminLogoutButton {
     border-radius: 10px;
     cursor: pointer;
     font-size: 1em;
-    margin-right: 30%;
+    min-width: 110px;
+    min-height: 42px;
+    margin: 0;
+    font-weight: 800;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+}
+
+.c-button[type="reset"] {
+    border: 1px solid var(--color-accent-border-strong);
+    background: rgba(23, 20, 17, 0.78);
+    color: var(--color-accent);
+}
+
+.c-button[type="reset"]:hover {
+    background: rgba(201, 139, 78, 0.12);
+}
+
+.c-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(201, 139, 78, 0.28);
+    filter: brightness(1.06);
 }
 .field {
     color: var(--color-accent);
 } 
 .form {
+    position: relative;
+    left: 12px;
+    width: min(820px, calc(100% - 32px));
+    margin: 72px auto 0;
     color: var(--color-accent);
-    margin-right: 40%;
 }
 .form-honeypot {
     position: absolute;
@@ -298,42 +788,101 @@ nav.is-admin #adminLogoutButton {
 }
 
 .form fieldset {
-    border: 1px solid var(--color-accent);
+    position: relative;
+    left: 20px;
+    box-sizing: border-box;
+    padding: 28px;
+    border: 1px solid var(--color-accent-border-strong);
+    border-radius: 16px;
+    background: rgba(23, 20, 17, 0.88);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.32);
+    backdrop-filter: blur(12px);
+    animation: pageReveal 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.form fieldset legend {
+    padding: 0 10px;
+    color: var(--color-accent);
+    font-size: 1.15rem;
 }
 .form p {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    margin: 18px 0;
     color: var(--color-accent);
 }
+.form p:nth-of-type(3) {
+    align-items: start;
+}
+.form p:nth-of-type(3) .field {
+    padding-top: 12px;
+}
+.form p:last-child {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.form-note,
+.contact-status {
+    width: min(680px, calc(100% - 32px));
+    margin-right: auto;
+    margin-left: auto;
+    text-align: center;
+}
 .cas{
+    position: relative;
+    left: 40px;
     box-sizing: border-box;
-    width: 340px;
-    height: 15px;
-    max-width: 100%;
-    min-height: 34px;
+    width: 97%;
+    min-height: 42px;
     border-radius: 20px;
     border: 1px solid var(--color-accent-border-strong);
-    padding: 6px 14px;
-    background: rgba(255, 255, 255, 0.9);
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.92);
     color: #222;
     font: inherit;
-    margin-right: 40px;
-    position: relative;
-    top: 0px;
-    align-self: center;
+    transition: border 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 }
 .cas:focus{
     outline: 2px solid var(--color-accent);
     outline-offset: 2px;
+    background: var(--color-white);
+    box-shadow: 0 0 18px rgba(201, 139, 78, 0.2);
 }
 .textarea {
-    border-radius: 20px;
-    padding-inline: 50px;
-    padding-bottom: 50px;
     position: relative;
-    top: 30px;
+    left: 40px;
+    box-sizing: border-box;
+    width: 97%;
+    min-height: 150px;
+    top: 0;
+    border: 1px solid var(--color-accent-border-strong);
+    border-radius: 16px;
+    padding: 14px 18px;
     align-self: center;
+    resize: vertical;
+    background: rgba(255, 255, 255, 0.92);
+    color: #222;
+    font: inherit;
+    transition: border 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 }
+
+.textarea:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    background: var(--color-white);
+    box-shadow: 0 0 18px rgba(201, 139, 78, 0.2);
+}
+
+/* 6. Admin login */
 #adminLoginButton,
 #adminLogoutButton {
+    position: relative;
+    right: 5px;
     flex-shrink: 0;
     align-self: center;
     margin: -10px 3px 0 150px;
@@ -493,9 +1042,11 @@ nav.is-admin #adminLogoutButton {
     font-size: 0.9rem;
 }
 
+/* 7. Content pages (info, news, videos) */
 .content-page {
     max-width: 1100px;
     margin: 90px auto 0;
+    animation: pageReveal 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .content-add {
@@ -635,6 +1186,16 @@ nav.is-admin #adminLogoutButton {
     border-radius: 12px;
     background: rgba(23, 20, 17, 0.9);
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.35s ease,
+                box-shadow 0.35s ease;
+    animation: cardReveal 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.content-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--color-accent-border-strong);
+    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.42), 0 0 22px rgba(201, 139, 78, 0.08);
 }
 
 .content-card img,
@@ -691,6 +1252,7 @@ nav.is-admin #adminLogoutButton {
     background: rgba(201, 139, 78, 0.12);
 }
 
+/* 8. Responsive layouts */
 @media (max-width: 900px) {
     body {
         padding: 150px 24px 40px;
@@ -753,31 +1315,25 @@ nav.is-admin #adminLogoutButton {
     }
 
     body::before {
-        position: fixed;
+        position: absolute;
         inset: 0;
         z-index: -2;
-        background: radial-gradient(ellipse at 50% 36%, rgba(201, 139, 78, 0.12), transparent 60%),
-            linear-gradient(180deg, #080808 0%, #171411 50%, #080808 100%);
+        background-image:
+            radial-gradient(ellipse at 50% 36%, rgba(201, 139, 78, 0.12), transparent 60%),
+            url("bg.jpg");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
         content: "";
         pointer-events: none;
     }
 
     body::after {
-        position: fixed;
-        top: clamp(270px, 32vh, 320px);
-        left: 0;
-        z-index: -1;
-        width: 100%;
-        aspect-ratio: 1375 / 768;
-        background: url("background.jpg") center / 100% 100% no-repeat;
-        content: "";
-        -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
-        mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
-        pointer-events: none;
+        content: none;
     }
 
     nav {
-        position: absolute;
+        position: fixed;
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto auto;
         grid-template-areas:
@@ -802,6 +1358,7 @@ nav.is-admin #adminLogoutButton {
     nav > div {
         grid-area: logo;
         min-width: 0;
+        left: 5px;
     }
 
     nav img {
@@ -845,6 +1402,7 @@ nav.is-admin #adminLogoutButton {
         justify-self: end;
         margin: 0;
         padding: 6px 7px;
+        right: 5px;
     }
 
     nav .search {
@@ -854,6 +1412,7 @@ nav.is-admin #adminLogoutButton {
         min-width: 0;
         margin: 0;
         padding: 8px 10px;
+        left: -5px;
     }
 
     nav.is-admin .search {
@@ -881,6 +1440,35 @@ nav.is-admin #adminLogoutButton {
         text-align: center;
     }
 
+    .hero-eyebrow {
+        margin-bottom: 10px;
+        font-size: 0.72rem;
+    }
+
+    .hero-actions {
+        width: 100%;
+        gap: 8px;
+        margin-top: 20px;
+    }
+
+    .hero-primary,
+    .hero-secondary {
+        min-width: 0;
+        flex: 1;
+        min-height: 44px;
+        padding-inline: 10px;
+        font-size: 0.88rem;
+    }
+
+    .hero-proof {
+        gap: 8px;
+        font-size: 0.68rem;
+    }
+
+    .hero-proof span:not(:last-child)::after {
+        margin-right: 8px;
+    }
+
     p {
         font-size: 1rem;
         line-height: 1.5;
@@ -897,12 +1485,33 @@ nav.is-admin #adminLogoutButton {
 
     .form {
         box-sizing: border-box;
+        width: 100%;
         margin-right: 0;
+        left: 0;
     }
 
     .form fieldset {
         width: 100%;
         padding: 12px;
+        left: 0;
+    }
+
+    .form p {
+        grid-template-columns: 1fr;
+        gap: 6px;
+        width: 100%;
+    }
+
+    .form p:nth-of-type(3) .field {
+        padding-top: 0;
+    }
+
+    .form p:last-child {
+        justify-content: stretch;
+    }
+
+    .form p:last-child .c-button {
+        flex: 1;
     }
 
     .cas {
@@ -911,6 +1520,7 @@ nav.is-admin #adminLogoutButton {
         max-width: 100%;
         margin-right: 0;
         margin-top: 8px;
+        left: 0;
     }
 
     .textarea {
@@ -920,10 +1530,11 @@ nav.is-admin #adminLogoutButton {
         min-height: 120px;
         padding: 12px;
         top: 0;
+        left: 0;
     }
 
     .c-button {
-        margin-right: 8px;
+        margin: 0;
     }
 
     .login-panel {
@@ -948,11 +1559,21 @@ nav.is-admin #adminLogoutButton {
         width: 28px;
         height: 28px;
     }
+
+    .social-links li:first-child img {
+        width: 34px;
+        height: 34px;
+    }
 }
 
 @media (min-width: 1200px) {
     .social-links img {
         width: 50px;
         height: 50px;
+    }
+
+    .social-links li:first-child img {
+        width: 44px;
+        height: 44px;
     }
 }
