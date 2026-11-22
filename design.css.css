@@ -1137,7 +1137,7 @@ nav.is-admin #adminLogoutButton {
 }
 
 #adminLogoutButton {
-    right: 13px;
+    right: -3px;
 }
 
 #adminLoginButton:hover,
