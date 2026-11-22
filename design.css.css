@@ -51,27 +51,25 @@
 }
 
 .cursor-ring {
-    width: 34px;
-    height: 34px;
-    border: 1px solid rgba(201, 139, 78, 0.78);
-    border-radius: 50%;
-    box-shadow: 0 0 14px rgba(201, 139, 78, 0.18), inset 0 0 8px rgba(201, 139, 78, 0.08);
+    z-index: 9998;
+    width: 32px;
+    height: 32px;
+    background: url("logo.png") center / contain no-repeat;
     opacity: 0;
+    filter: drop-shadow(0 0 6px rgba(201, 139, 78, 0.68));
     transform: translate3d(-50%, -50%, 0) scale(1);
     transition:
         width 0.22s cubic-bezier(0.16, 1, 0.3, 1),
         height 0.22s cubic-bezier(0.16, 1, 0.3, 1),
         opacity 0.18s ease,
-        border-color 0.18s ease,
-        background 0.18s ease,
+        filter 0.18s ease,
         transform 0.08s linear;
 }
 
 .cursor-ring.is-active {
-    width: 46px;
-    height: 46px;
-    border-color: rgba(235, 180, 119, 0.95);
-    background: rgba(201, 139, 78, 0.08);
+    width: 40px;
+    height: 40px;
+    filter: drop-shadow(0 0 10px rgba(241, 199, 143, 0.95));
 }
 
 .cursor-ring.is-clicking {
@@ -79,13 +77,13 @@
 }
 
 .cursor-dot {
-    width: 5px;
-    height: 5px;
+    z-index: 9997;
+    width: 4px;
+    height: 4px;
     border-radius: 50%;
-    background: #e2ad75;
-    box-shadow: 0 0 12px rgba(201, 139, 78, 0.95);
+    background: #f4d0a1;
+    box-shadow: 0 0 10px rgba(201, 139, 78, 0.95);
     opacity: 0;
-    transform: translate3d(-50%, -50%, 0);
 }
 
 .cursor-spark {
@@ -128,6 +126,32 @@
     }
 }
 
+@media (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    html,
+    body,
+    a,
+    button,
+    input,
+    textarea,
+    select,
+    [role="button"] {
+        cursor: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html,
+    body,
+    a,
+    button,
+    input,
+    textarea,
+    select,
+    [role="button"] {
+        cursor: auto;
+    }
+}
+
 body {
     position: relative;
     isolation: isolate;
@@ -136,6 +160,30 @@ body {
     margin: 0; 
     padding: 80px;
     overflow-x: hidden;
+}
+
+.page-transition-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9996;
+    background:
+        radial-gradient(ellipse at center, rgba(183, 127, 67, 0.12), transparent 58%),
+        rgba(8, 8, 8, 0.96);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.page-transition-overlay.is-entering,
+.page-transition-overlay.is-leaving {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .page-transition-overlay {
+        display: none;
+        transition: none;
+    }
 }
 
 html {
@@ -1614,7 +1662,7 @@ nav.is-admin #adminLogoutButton {
 
     nav > div {
         min-width: 0;
-        left: 0;
+        left: -3px;
     }
 
     nav img {
@@ -1644,18 +1692,21 @@ nav.is-admin #adminLogoutButton {
         flex-direction: column;
         align-items: center;
         justify-content: space-between;
-        border: 1px solid rgba(201, 139, 78, 0.34);
+        border: 1px solid rgba(201, 139, 78, 0.58);
         border-radius: 12px;
-        background: rgba(201, 139, 78, 0.08);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+        background: rgba(8, 8, 8, 0.96);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.48);
+        color: #f1c78f;
     }
 
     .mobile-menu-button span {
         display: block;
         width: 21px;
-        height: 2px;
+        height: 3px;
         border-radius: 999px;
-        background: var(--color-accent);
+        background: #f1c78f;
+        box-shadow: 0 0 7px rgba(241, 199, 143, 0.62);
+        opacity: 1;
         transition: transform 0.28s ease, opacity 0.28s ease;
     }
 
@@ -1675,12 +1726,12 @@ nav.is-admin #adminLogoutButton {
     nav.mobile-menu-open ul {
         position: absolute;
         top: 64px;
-        right: 12px;
-        left: 12px;
+        right: 8px;
+        left: auto;
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, minmax(82px, 1fr));
         gap: 8px;
-        width: auto;
+        width: min(210px, calc(100vw - 16px));
         margin: 0;
         padding: 10px;
         border: 1px solid rgba(201, 139, 78, 0.28);

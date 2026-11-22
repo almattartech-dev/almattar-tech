@@ -83,9 +83,33 @@ const contactStatus = document.getElementById("contactStatus");
 let editingNewsKey = null;
 let editingNewsItem = null;
 
+const pageTransitionOverlay = document.createElement("div");
+pageTransitionOverlay.className = "page-transition-overlay is-entering";
+pageTransitionOverlay.setAttribute("aria-hidden", "true");
+document.body.append(pageTransitionOverlay);
+
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => pageTransitionOverlay.classList.remove("is-entering"));
+});
+
+let isNavigating = false;
 document.querySelectorAll("[data-nav-page]").forEach((button) => {
   button.addEventListener("click", () => {
-    window.location.href = button.dataset.navPage;
+    const destination = button.dataset.navPage;
+    if (!destination || isNavigating) {
+      return;
+    }
+
+    isNavigating = true;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      window.location.href = destination;
+      return;
+    }
+
+    pageTransitionOverlay.classList.add("is-leaving");
+    window.setTimeout(() => {
+      window.location.href = destination;
+    }, 240);
   });
 });
 
@@ -795,7 +819,7 @@ if (window.matchMedia("(pointer: fine)").matches) {
     targetY = event.clientY;
 
     glow.style.transform = `translate3d(${targetX - 120}px, ${targetY - 120}px, 0)`;
-    dot.style.transform = `translate3d(${targetX}px, ${targetY}px, 0)`;
+    dot.style.transform = `translate3d(${targetX - 2}px, ${targetY + 16}px, 0)`;
     glow.style.opacity = "1";
     ring.style.opacity = "1";
     dot.style.opacity = "1";
@@ -839,12 +863,12 @@ if (window.matchMedia("(pointer: fine)").matches) {
     ringX += (targetX - ringX) * 0.16;
     ringY += (targetY - ringY) * 0.16;
     const isActive = ring.classList.contains("is-active");
-    const ringSize = isActive ? 46 : 34;
+    const ringSize = isActive ? 40 : 32;
     ring.style.transform = `translate3d(${ringX - ringSize / 2}px, ${ringY - ringSize / 2}px, 0)`;
 
     if (isActive) {
-      ring.style.width = "46px";
-      ring.style.height = "46px";
+      ring.style.width = "40px";
+      ring.style.height = "40px";
     } else {
       ring.style.width = "";
       ring.style.height = "";
