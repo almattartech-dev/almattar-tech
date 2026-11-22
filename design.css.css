@@ -33,6 +33,18 @@ body {
     min-height: 100vh;   
     margin: 0; 
     padding: 80px;
+    overflow-x: hidden;
+}
+
+html {
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
 }
 
 body::before {
@@ -1277,6 +1289,9 @@ nav.is-admin #adminLogoutButton {
     nav ul {
         flex-wrap: wrap;
         gap: 10px;
+        order: 3;
+        width: 100%;
+        justify-content: center;
     }
 
     .space {
@@ -1375,6 +1390,7 @@ nav.is-admin #adminLogoutButton {
     nav ul {
         grid-area: menu;
         display: flex;
+        width: 100%;
         flex-wrap: wrap;
         justify-content: center;
         gap: 6px;
@@ -1563,6 +1579,58 @@ nav.is-admin #adminLogoutButton {
     .social-links li:first-child img {
         width: 34px;
         height: 34px;
+    }
+}
+
+@media (max-width: 380px) {
+    body {
+        padding-inline: 10px;
+    }
+
+    nav {
+        grid-template-columns: minmax(0, 1fr) auto 68px;
+        padding-inline: 8px;
+    }
+
+    nav > div .nav-text {
+        display: none;
+    }
+
+    nav ul {
+        gap: 4px;
+    }
+
+    nav ul button {
+        padding: 7px 6px;
+        font-size: 0.68rem;
+    }
+
+    nav .search,
+    nav.is-admin .search {
+        width: 68px;
+    }
+
+    h1 {
+        font-size: clamp(1.75rem, 9vw, 2.25rem);
+    }
+
+    .hero-proof {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .hero-proof span:not(:last-child)::after {
+        display: none;
+    }
+
+    .social-links {
+        right: 10px;
+        bottom: 10px;
+    }
+
+    .social-links a {
+        width: 42px;
+        height: 42px;
     }
 }
 
