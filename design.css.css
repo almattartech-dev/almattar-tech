@@ -167,8 +167,8 @@ body {
     inset: 0;
     z-index: 9996;
     background:
-        radial-gradient(ellipse at center, rgba(183, 127, 67, 0.12), transparent 58%),
-        rgba(8, 8, 8, 0.96);
+        radial-gradient(ellipse at center, rgba(183, 127, 67, 0.08), transparent 58%),
+        rgba(8, 8, 8, 0.32);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.24s cubic-bezier(0.22, 1, 0.36, 1);
@@ -1136,6 +1136,10 @@ nav.is-admin #adminLogoutButton {
     transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 
+#adminLogoutButton {
+    right: 13px;
+}
+
 #adminLoginButton:hover,
 #adminLogoutButton:hover {
     background: var(--color-accent);
@@ -1725,7 +1729,7 @@ nav.is-admin #adminLogoutButton {
 
     nav.mobile-menu-open ul {
         position: absolute;
-        top: 64px;
+        top: 112px;
         right: 8px;
         left: auto;
         display: grid;
@@ -1743,6 +1747,30 @@ nav.is-admin #adminLogoutButton {
         transform: translateY(-8px) scale(0.98);
         transform-origin: top right;
         animation: mobileMenuReveal 0.24s ease forwards;
+    }
+
+    nav.mobile-menu-open .search {
+        position: absolute;
+        top: 64px;
+        right: 8px;
+        left: auto;
+        display: block;
+        box-sizing: border-box;
+        width: min(210px, calc(100vw - 16px));
+        max-width: none;
+        margin: 0;
+        padding: 10px 12px;
+        border: 1px solid rgba(201, 139, 78, 0.34);
+        border-radius: 12px;
+        background: rgba(12, 10, 8, 0.98);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.42);
+    }
+
+    nav.mobile-menu-open .search-results {
+        top: 108px;
+        right: 8px;
+        z-index: 2;
+        width: min(210px, calc(100vw - 16px));
     }
 
     nav.mobile-menu-open ul li {
