@@ -1491,7 +1491,7 @@ nav.is-admin #adminLogoutButton {
 
 @media (max-width: 600px) {
     body {
-        padding: 160px 16px 32px;
+        padding: 72px 16px 74px;
         background: none;
         background-color: #080808;
     }
@@ -1569,31 +1569,41 @@ nav.is-admin #adminLogoutButton {
 
     nav {
         position: fixed;
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto auto;
-        grid-template-areas:
-            "logo login search"
-            "menu menu menu";
-        gap: 10px 8px;
-        padding: 10px 12px;
-        background: rgba(8, 8, 8, 0.88);
-        border-bottom: 1px solid var(--color-accent-border);
+        display: flex;
+        height: 58px;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 14px;
+        background: rgba(8, 8, 8, 0.94);
+        border-bottom: 1px solid rgba(201, 139, 78, 0.24);
+        backdrop-filter: blur(12px);
     }
 
     .social-links {
         position: fixed;
+        right: 50%;
+        bottom: 12px;
+        left: auto;
         display: flex;
-        grid-template-columns: none;
-        grid-template-areas: none;
-        flex-wrap: nowrap;
         gap: 0;
         padding: 0;
+        transform: translateX(50%);
+    }
+
+    .social-links ul {
+        flex-wrap: nowrap;
+        gap: 10px;
+        margin: 0;
+        padding: 6px 10px;
+        border: 1px solid rgba(201, 139, 78, 0.16);
+        border-radius: 999px;
+        background: rgba(8, 8, 8, 0.7);
+        backdrop-filter: blur(10px);
     }
 
     nav > div {
-        grid-area: logo;
         min-width: 0;
-        left: 5px;
+        left: 0;
     }
 
     nav img {
@@ -1607,103 +1617,87 @@ nav.is-admin #adminLogoutButton {
         gap: 5px;
     }
 
-    nav ul {
-        grid-area: menu;
-        display: flex;
-        width: 100%;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 6px;
-        min-width: 0;
+    nav ul,
+    nav #adminLoginButton,
+    nav #adminLogoutButton,
+    nav .search {
+        display: none;
     }
 
     nav > div .nav-text {
         overflow: hidden;
-        margin-left: 5px;
+        margin-left: 4px;
         padding: 4px 6px 4px 7px;
         font-size: 0.9em;
         letter-spacing: 0.05em;
         text-overflow: clip;
-        transform: translateX(5px) translateY(-3px);
+        transform: none;
         white-space: nowrap;
     }
 
-    nav ul button {
-        padding: 7px 8px;
-        font-size: 0.75rem;
-    }
-
-    .space {
-        margin: 0;
-    }
-
-    nav #adminLoginButton,
-    nav #adminLogoutButton {
-        grid-area: login;
-        justify-self: end;
-        margin: 0;
-        padding: 6px 7px;
-        right: 5px;
-    }
-
-    nav .search {
-        grid-area: search;
-        box-sizing: border-box;
-        width: 80px;
-        min-width: 0;
-        margin: 0;
-        padding: 8px 10px;
-        left: -5px;
-    }
-
-    nav.is-admin .search {
-        width: 104px;
-    }
-
-    nav .search-results {
-        top: calc(100% - 10px);
-        right: 12px;
-    }
-
     h1 {
-        margin-top: 6px;
-        font-size: clamp(2rem, 9vw, 2.7rem);
+        margin-top: 4px;
+        font-size: clamp(1.85rem, 8.5vw, 2.35rem);
         text-align: center;
     }
 
     .home-hero {
-        margin: 8px 0 0;
+        width: 100%;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .hero-mobile-brand {
+        margin-bottom: 9px;
+    }
+
+    .hero-mobile-brand img {
+        width: 68px;
+        height: 68px;
+    }
+
+    .mobile-logo-ring {
+        top: -8px;
+        width: 84px;
+        height: 84px;
+    }
+
+    .mobile-brand-name {
+        display: none;
     }
 
     p.pre {
-        font-size: clamp(16px, 4.5vw, 18px);
-        line-height: 1.5;
+        margin: 4px 0 0;
+        font-size: clamp(15px, 4.2vw, 17px);
+        line-height: 1.45;
         text-align: center;
     }
 
     .hero-eyebrow {
-        margin-bottom: 10px;
-        font-size: 0.72rem;
+        margin: 0 auto 7px;
+        padding: 5px 10px;
+        font-size: 0.66rem;
     }
 
     .hero-actions {
         width: 100%;
         gap: 8px;
-        margin-top: 20px;
+        margin-top: 16px;
     }
 
     .hero-primary,
     .hero-secondary {
         min-width: 0;
         flex: 1;
-        min-height: 44px;
-        padding-inline: 10px;
-        font-size: 0.88rem;
+        min-height: 42px;
+        padding-inline: 8px;
+        font-size: 0.82rem;
     }
 
     .hero-proof {
         gap: 8px;
-        font-size: 0.68rem;
+        margin-top: 12px;
+        font-size: 0.64rem;
     }
 
     .hero-proof span:not(:last-child)::after {
@@ -1813,7 +1807,6 @@ nav.is-admin #adminLogoutButton {
     }
 
     nav {
-        grid-template-columns: minmax(0, 1fr) auto 68px;
         padding-inline: 8px;
     }
 
@@ -1821,20 +1814,6 @@ nav.is-admin #adminLogoutButton {
         margin-left: 4px;
         padding-inline: 4px;
         font-size: 0.82em;
-    }
-
-    nav ul {
-        gap: 4px;
-    }
-
-    nav ul button {
-        padding: 7px 6px;
-        font-size: 0.68rem;
-    }
-
-    nav .search,
-    nav.is-admin .search {
-        width: 68px;
     }
 
     h1 {
@@ -1851,8 +1830,9 @@ nav.is-admin #adminLogoutButton {
     }
 
     .social-links {
-        right: 10px;
+        right: 50%;
         bottom: 10px;
+        transform: translateX(50%);
     }
 
     .social-links a {
