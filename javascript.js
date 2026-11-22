@@ -725,3 +725,98 @@ contentForm?.addEventListener("submit", addPageContent);
 if (contentPage) {
   loadPageContent(contentPage.dataset.contentPage);
 }
+
+if (window.matchMedia("(pointer: fine)").matches) {
+  const glow = document.createElement("span");
+  const ring = document.createElement("span");
+  const dot = document.createElement("span");
+
+  glow.className = "cursor-glow";
+  ring.className = "cursor-ring";
+  dot.className = "cursor-dot";
+
+  document.body.append(glow, ring, dot);
+
+  let targetX = window.innerWidth / 2;
+  let targetY = window.innerHeight / 2;
+  let ringX = targetX;
+  let ringY = targetY;
+  let lastSparkTime = 0;
+
+  document.addEventListener("mousemove", (event) => {
+    targetX = event.clientX;
+    targetY = event.clientY;
+
+    glow.style.transform = `translate3d(${targetX - 120}px, ${targetY - 120}px, 0)`;
+    dot.style.transform = `translate3d(${targetX}px, ${targetY}px, 0)`;
+    glow.style.opacity = "1";
+    ring.style.opacity = "1";
+    dot.style.opacity = "1";
+
+    const now = performance.now();
+    if (now - lastSparkTime > 55) {
+      lastSparkTime = now;
+      const spark = document.createElement("span");
+      spark.className = "cursor-spark";
+      spark.style.left = `${targetX}px`;
+      spark.style.top = `${targetY}px`;
+      document.body.appendChild(spark);
+      spark.addEventListener("animationend", () => spark.remove(), { once: true });
+    }
+  });
+
+  document.addEventListener("mouseleave", () => {
+    glow.style.opacity = "0";
+    ring.style.opacity = "0";
+    dot.style.opacity = "0";
+  });
+
+  document.addEventListener("mousedown", () => ring.classList.add("is-clicking"));
+  document.addEventListener("mouseup", () => ring.classList.remove("is-clicking"));
+
+  document.addEventListener("click", (event) => {
+    const click = document.createElement("span");
+    click.className = "cursor-click";
+    click.style.left = `${event.clientX}px`;
+    click.style.top = `${event.clientY}px`;
+    document.body.appendChild(click);
+    click.addEventListener("animationend", () => click.remove(), { once: true });
+  });
+
+  document.querySelectorAll("a, button, input, textarea, select, [role='button']").forEach((element) => {
+    element.addEventListener("mouseenter", () => ring.classList.add("is-active"));
+    element.addEventListener("mouseleave", () => ring.classList.remove("is-active"));
+  });
+
+  const animatePointer = () => {
+    ringX += (targetX - ringX) * 0.16;
+    ringY += (targetY - ringY) * 0.16;
+    const isActive = ring.classList.contains("is-active");
+    const ringSize = isActive ? 46 : 34;
+    ring.style.transform = `translate3d(${ringX - ringSize / 2}px, ${ringY - ringSize / 2}px, 0)`;
+
+    if (isActive) {
+      ring.style.width = "46px";
+      ring.style.height = "46px";
+    } else {
+      ring.style.width = "";
+      ring.style.height = "";
+    }
+
+    requestAnimationFrame(animatePointer);
+  };
+
+  animatePointer();
+
+  document.querySelectorAll(".content-card").forEach((card) => {
+    card.addEventListener("mousemove", (event) => {
+      const bounds = card.getBoundingClientRect();
+      const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+      const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+      card.style.transform = `perspective(900px) translateY(-5px) rotateX(${-y * 3}deg) rotateY(${x * 4}deg)`;
+    });
+    card.addEventListener("mouseleave", () => {
+      card.style.transform = "";
+    });
+  });
+}

@@ -26,6 +26,108 @@
     --color-google-red: #ea4335;
 }
 
+/* Premium pointer effects */
+.cursor-glow,
+.cursor-ring,
+.cursor-dot,
+.cursor-spark,
+.cursor-click {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9998;
+    pointer-events: none;
+}
+
+.cursor-glow {
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201, 139, 78, 0.13) 0, rgba(201, 139, 78, 0.055) 34%, transparent 68%);
+    opacity: 0;
+    filter: blur(2px);
+    transform: translate3d(-50%, -50%, 0);
+    transition: opacity 0.25s ease;
+}
+
+.cursor-ring {
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(201, 139, 78, 0.78);
+    border-radius: 50%;
+    box-shadow: 0 0 14px rgba(201, 139, 78, 0.18), inset 0 0 8px rgba(201, 139, 78, 0.08);
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) scale(1);
+    transition:
+        width 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+        height 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.18s ease,
+        border-color 0.18s ease,
+        background 0.18s ease,
+        transform 0.08s linear;
+}
+
+.cursor-ring.is-active {
+    width: 46px;
+    height: 46px;
+    border-color: rgba(235, 180, 119, 0.95);
+    background: rgba(201, 139, 78, 0.08);
+}
+
+.cursor-ring.is-clicking {
+    transform: translate3d(-50%, -50%, 0) scale(0.72);
+}
+
+.cursor-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #e2ad75;
+    box-shadow: 0 0 12px rgba(201, 139, 78, 0.95);
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0);
+}
+
+.cursor-spark {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #d6a270;
+    box-shadow: 0 0 8px rgba(201, 139, 78, 0.8);
+    animation: cursorSpark 0.58s ease-out forwards;
+}
+
+.cursor-click {
+    width: 18px;
+    height: 18px;
+    border: 1px solid rgba(226, 173, 117, 0.9);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: cursorClick 0.62s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes cursorSpark {
+    from {
+        opacity: 0.9;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translate(-50%, -50%) translateY(12px) scale(0);
+    }
+}
+
+@keyframes cursorClick {
+    0% {
+        opacity: 0.95;
+        transform: translate(-50%, -50%) scale(0.35);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(5);
+    }
+}
+
 body {
     position: relative;
     isolation: isolate;
@@ -504,6 +606,11 @@ nav button:hover::after {
     to { opacity: 1; transform: translateX(0) translateY(-8px); }
 }
 
+@keyframes navMobileReveal {
+    from { opacity: 0; transform: translateX(-8px) translateY(-3px); }
+    to { opacity: 1; transform: translateX(5px) translateY(-3px); }
+}
+
 @keyframes navItemReveal {
     from { opacity: 0; transform: translateY(-12px); }
     to { opacity: 1; transform: translateY(0); }
@@ -535,6 +642,14 @@ nav button:hover::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .cursor-glow,
+    .cursor-ring,
+    .cursor-dot,
+    .cursor-spark,
+    .cursor-click {
+        display: none;
+    }
+
     nav > div > img {
         animation: none;
         transition: none;
@@ -564,8 +679,18 @@ nav button:hover::after {
 }
 
 .nav-text {
-    color: var(--color-accent);
+    margin-left: 5px;
+    padding: 4px 7px;
+    border-left: 1px solid rgba(201, 139, 78, 0.48);
+    color: #d8a66f;
+    font-family: Georgia, "Times New Roman", serif;
     font-size: 1.2em;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    text-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.95),
+        0 0 10px rgba(201, 139, 78, 0.38);
     white-space: nowrap;
     transform: translateY(-8px);
 }
@@ -1330,16 +1455,18 @@ nav.is-admin #adminLogoutButton {
     }
 
     body::before {
-        position: absolute;
+        position: fixed;
         inset: 0;
         z-index: -2;
         background-image:
-            radial-gradient(ellipse at 50% 36%, rgba(201, 139, 78, 0.12), transparent 60%),
-            url("bg.jpg");
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
+            linear-gradient(90deg, rgba(8, 8, 8, 0.92) 0%, rgba(8, 8, 8, 0.66) 48%, rgba(8, 8, 8, 0.16) 82%, rgba(8, 8, 8, 0.08) 100%),
+            linear-gradient(180deg, rgba(8, 8, 8, 0.48) 0%, transparent 28%, rgba(8, 8, 8, 0.08) 72%, rgba(8, 8, 8, 0.58) 100%),
+            url("phone-bg.jpg");
+        background-size: 100% 100%, 100% 100%, cover;
+        background-position: center, center, 72% center;
+        background-repeat: no-repeat, no-repeat, no-repeat;
         content: "";
+        overflow: hidden;
         pointer-events: none;
     }
 
@@ -1399,8 +1526,13 @@ nav.is-admin #adminLogoutButton {
 
     nav > div .nav-text {
         overflow: hidden;
-        font-size: 0.68rem;
+        margin-left: 5px;
+        padding: 4px 6px 4px 7px;
+        font-size: 0.9em;
+        letter-spacing: 0.05em;
         text-overflow: clip;
+        transform: translateX(5px) translateY(-3px);
+        white-space: nowrap;
     }
 
     nav ul button {
@@ -1593,7 +1725,9 @@ nav.is-admin #adminLogoutButton {
     }
 
     nav > div .nav-text {
-        display: none;
+        margin-left: 4px;
+        padding-inline: 4px;
+        font-size: 0.82em;
     }
 
     nav ul {
