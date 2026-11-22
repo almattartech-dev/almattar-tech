@@ -426,6 +426,10 @@ nav ul {
     gap: 20px;
 }
 
+.mobile-menu-button {
+    display: none;
+}
+
 nav button {
     background: rgba(255, 255, 255, 0.05); 
     color: var(--color-text);
@@ -586,6 +590,13 @@ nav button:hover::after {
     70%, 100% {
         opacity: 0;
         transform: translateX(-50%) scale(1.25);
+    }
+}
+
+@keyframes mobileMenuReveal {
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
 
@@ -1061,7 +1072,7 @@ nav.is-admin #adminLogoutButton {
 #adminLoginButton,
 #adminLogoutButton {
     position: relative;
-    right: 5px;
+    right: 25px;
     flex-shrink: 0;
     align-self: center;
     margin: -10px 3px 0 150px;
@@ -1622,6 +1633,82 @@ nav.is-admin #adminLogoutButton {
     nav #adminLogoutButton,
     nav .search {
         display: none;
+    }
+
+    .mobile-menu-button {
+        display: flex;
+        width: 42px;
+        height: 42px;
+        margin-left: auto;
+        padding: 11px 9px;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        border: 1px solid rgba(201, 139, 78, 0.34);
+        border-radius: 12px;
+        background: rgba(201, 139, 78, 0.08);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+    }
+
+    .mobile-menu-button span {
+        display: block;
+        width: 21px;
+        height: 2px;
+        border-radius: 999px;
+        background: var(--color-accent);
+        transition: transform 0.28s ease, opacity 0.28s ease;
+    }
+
+    nav.mobile-menu-open .mobile-menu-button span:nth-child(1) {
+        transform: translateY(8px) rotate(45deg);
+    }
+
+    nav.mobile-menu-open .mobile-menu-button span:nth-child(2) {
+        opacity: 0;
+        transform: scaleX(0);
+    }
+
+    nav.mobile-menu-open .mobile-menu-button span:nth-child(3) {
+        transform: translateY(-8px) rotate(-45deg);
+    }
+
+    nav.mobile-menu-open ul {
+        position: absolute;
+        top: 64px;
+        right: 12px;
+        left: 12px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        width: auto;
+        margin: 0;
+        padding: 10px;
+        border: 1px solid rgba(201, 139, 78, 0.28);
+        border-radius: 16px;
+        background: rgba(12, 10, 8, 0.96);
+        box-shadow: 0 18px 38px rgba(0, 0, 0, 0.58);
+        backdrop-filter: blur(14px);
+        opacity: 0;
+        transform: translateY(-8px) scale(0.98);
+        transform-origin: top right;
+        animation: mobileMenuReveal 0.24s ease forwards;
+    }
+
+    nav.mobile-menu-open ul li {
+        width: 100%;
+        opacity: 1;
+    }
+
+    nav.mobile-menu-open ul li:nth-child(n) {
+        animation: none;
+    }
+
+    nav.mobile-menu-open ul button {
+        width: 100%;
+        min-height: 40px;
+        padding: 8px 5px;
+        border-radius: 10px;
+        font-size: 0.72rem;
     }
 
     nav > div .nav-text {

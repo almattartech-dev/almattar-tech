@@ -15,12 +15,17 @@
             <img src="logo.png" alt="Logo">
             <span class="nav-text"><i>ALMATTAR-TECH</i></span>
         </div>
-        <ul class="nnn">
-            <li class="space"><button class="buttons" onclick="window.location.href='index.html'">HOME</button></li>
-            <li><button onclick="window.location.href='news.html'">NEWS</button></li>
-            <li><button onclick="window.location.href='videos.html'">VIDEOS</button></li>
-            <li><button onclick="window.location.href='contact.html'">CONTACT</button></li>
-            <li><button onclick="window.location.href='info.html'">INFO</button></li>
+        <button id="mobileMenuButton" class="mobile-menu-button" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="mobileMenu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <ul class="nnn" id="mobileMenu">
+            <li class="space"><button class="buttons" data-nav-page="index.html">HOME</button></li>
+            <li><button data-nav-page="news.html">NEWS</button></li>
+            <li><button data-nav-page="videos.html">VIDEOS</button></li>
+            <li><button data-nav-page="contact.html">CONTACT</button></li>
+            <li><button data-nav-page="info.html">INFO</button></li>
         </ul>
         <button id="adminLoginButton" type="button">ADMIN</button>
         <button id="adminLogoutButton" type="button" hidden>LOGOUT</button>

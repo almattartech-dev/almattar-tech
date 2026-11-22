@@ -83,6 +83,53 @@ const contactStatus = document.getElementById("contactStatus");
 let editingNewsKey = null;
 let editingNewsItem = null;
 
+document.querySelectorAll("[data-nav-page]").forEach((button) => {
+  button.addEventListener("click", () => {
+    window.location.href = button.dataset.navPage;
+  });
+});
+
+const mobileNav = document.querySelector("nav[data-database-url]");
+const mobileMenuButton = document.getElementById("mobileMenuButton");
+const mobileMenu = document.getElementById("mobileMenu");
+
+if (mobileNav && mobileMenuButton && mobileMenu) {
+  const setMobileMenu = (open) => {
+    mobileNav.classList.toggle("mobile-menu-open", open);
+    mobileMenuButton.setAttribute("aria-expanded", String(open));
+    mobileMenuButton.setAttribute("aria-label", open ? "Close navigation" : "Open navigation");
+  };
+
+  mobileMenuButton.addEventListener("click", () => {
+    setMobileMenu(!mobileNav.classList.contains("mobile-menu-open"));
+  });
+
+  mobileMenu.addEventListener("click", (event) => {
+    if (event.target.closest("button")) {
+      setMobileMenu(false);
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!mobileNav.contains(event.target)) {
+      setMobileMenu(false);
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      setMobileMenu(false);
+      mobileMenuButton.focus();
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 600) {
+      setMobileMenu(false);
+    }
+  });
+}
+
 function showLoginMessage(message) {
   if (loginMessage) {
     loginMessage.textContent = message;
